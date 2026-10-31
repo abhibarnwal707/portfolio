@@ -1,0 +1,96 @@
+---
+import type { Project } from '../data/projects';
+import Icon from './Icon.astro';
+
+interface Props {
+  project: Project;
+}
+const { project } = Astro.props;
+---
+
+<article class="project-card">
+  <p class="label">CASE {project.number}</p>
+  <h3><a class="card-link" href={`/projects/${project.slug}`}>{project.name}</a></h3>
+  <p class="oneliner">{project.oneLiner}</p>
+
+  <ul class="chips">
+    {
+      project.metrics.map((m) => (
+        <li class="chip">
+          <span class="chip-v">{m.value}</span>
+          <span class="chip-l">{m.label}</span>
+        </li>
+      ))
+    }
+  </ul>
+
+  <ul class="links">
+    {
+      project.links.map((l) => (
+        <li>
+          <a class="link" href={l.href} target="_blank" rel="noopener noreferrer">
+            {l.label} <Icon name="external" size={14} />
+          </a>
+        </li>
+      ))
+    }
+  </ul>
+</article>
+
+<style>
+  .project-card {
+    position: relative;
+    display: grid;
+    gap: 12px;
+    align-content: start;
+    height: 100%;
+    padding: 24px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    transition: transform 220ms ease-out, box-shadow 220ms ease-out;
+  }
+  h3 {
+    font-size: 1.75rem;
+  }
+  .card-link {
+    text-decoration: none;
+  }
+  /* the whole card is the click target for the case page */
+  .card-link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+  .card-link:focus-visible {
+    outline: none;
+  }
+  .card-link:focus-visible::after {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+  }
+  .oneliner {
+    font-size: 0.9375rem;
+    color: var(--muted);
+  }
+  .chips {
+    margin-top: 4px;
+  }
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 20px;
+    margin-top: 4px;
+    font-size: 0.9375rem;
+  }
+  .links a {
+    position: relative;
+    z-index: 1;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding-block: 6px;
+  }
+</style>

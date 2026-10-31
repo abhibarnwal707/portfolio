@@ -1,16 +1,31 @@
 ---
+import Base from '../layouts/Base.astro';
+import Hero from '../components/Hero.astro';
+import CaseBoard from '../components/CaseBoard.astro';
+import SkillsGraph from '../components/SkillsGraph.astro';
+import About from '../components/About.astro';
+import Education from '../components/Education.astro';
+import Contact from '../components/Contact.astro';
+import { site } from '../data/site';
+
+// Deliberately no worksFor field.
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: site.name,
+  jobTitle: site.role,
+  url: Astro.site?.href,
+  email: site.email,
+  address: { '@type': 'PostalAddress', addressLocality: 'Hyderabad' },
+  sameAs: [site.github, site.linkedin],
+};
 ---
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+<Base jsonLd={jsonLd}>
+  <Hero />
+  <CaseBoard />
+  <SkillsGraph />
+  <About />
+  <Education />
+  <Contact />
+</Base>

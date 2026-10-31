@@ -1,0 +1,91 @@
+---
+import Icon from './Icon.astro';
+---
+
+<button type="button" class="theme-toggle" data-theme-toggle aria-label="Switch to dark theme">
+  <span class="icon icon-moon"><Icon name="moon" /></span>
+  <span class="icon icon-sun"><Icon name="sun" /></span>
+</button>
+
+<style>
+  .theme-toggle {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--ink);
+    cursor: pointer;
+    transition: background-color 180ms ease-out;
+  }
+  .theme-toggle:hover {
+    background: var(--surface-2);
+  }
+  .icon {
+    grid-area: 1 / 1;
+    display: grid;
+    transition: transform 250ms ease-out, opacity 250ms ease-out;
+  }
+  /* light theme shows the moon (click to go dark), dark theme shows the sun */
+  .icon-sun {
+    opacity: 0;
+    transform: rotate(-90deg) scale(0.6);
+  }
+  :global(:root[data-theme='dark']) .icon-moon {
+    opacity: 0;
+    transform: rotate(90deg) scale(0.6);
+  }
+  :global(:root[data-theme='dark']) .icon-sun {
+    opacity: 1;
+    transform: none;
+  }
+  /* without JS the button can't do anything */
+  :global(html:not(.js)) .theme-toggle {
+    display: none;
+  }
+</style>
+
+<script>
+  const btn = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
+  const root = document.documentElement;
+  const COLORS = { light: '#F4EFE6', dark: '#111214' } as const;
+  type Theme = keyof typeof COLORS;
+
+  const stored = (): Theme | null => {
+    try {
+      const t = localStorage.getItem('theme');
+      return t === 'light' || t === 'dark' ? t : null;
+    } catch {
+      return null;
+    }
+  };
+  const current = (): Theme => (root.dataset.theme === 'dark' ? 'dark' : 'light');
+
+  const apply = (t: Theme) => {
+    root.dataset.theme = t;
+    root.style.colorScheme = t;
+    document.querySelector('meta[name="color-scheme"]')?.setAttribute('content', t);
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', COLORS[t]);
+    btn?.setAttribute('aria-label', t === 'dark' ? 'Switch to light theme' : 'Switch to dark theme');
+  };
+
+  apply(current());
+
+  btn?.addEventListener('click', () => {
+    const next: Theme = current() === 'dark' ? 'light' : 'dark';
+    apply(next);
+    try {
+      localStorage.setItem('theme', next);
+    } catch {
+      /* storage unavailable: the choice just won't persist */
+    }
+  });
+
+  // Follow the system live until the visitor picks a theme.
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+    if (!stored()) apply(e.matches ? 'dark' : 'light');
+  });
+</script>

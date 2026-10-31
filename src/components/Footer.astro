@@ -1,0 +1,53 @@
+---
+import { site } from '../data/site';
+---
+
+<footer class="site-footer">
+  <div class="wrap">
+    <hr class="rule" />
+    <p class="copy">© {site.year} {site.name}</p>
+    <p class="final">
+      <a href={site.linkedin} target="_blank" rel="noopener noreferrer">
+        More on LinkedIn <span class="arrow" aria-hidden="true">→</span>
+      </a>
+    </p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    padding-block: 24px 48px;
+    text-align: center;
+  }
+  .rule {
+    border: 0;
+    border-top: 1px solid var(--line);
+    margin: 0 0 24px;
+  }
+  .copy {
+    margin-inline: auto;
+    font-size: 0.875rem;
+    color: var(--muted);
+  }
+  .final {
+    margin: 16px auto 0;
+    font-size: 1.125rem;
+  }
+  .final a {
+    display: inline-block;
+    padding: 8px 4px;
+    font-weight: 600;
+    text-decoration: underline;
+    text-decoration-color: var(--accent);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.2em;
+  }
+  .arrow {
+    display: inline-block;
+    transition: transform 180ms ease-out;
+  }
+  .final a:hover .arrow,
+  .final a:focus-visible .arrow {
+    transform: translateX(5px);
+  }
+</style>

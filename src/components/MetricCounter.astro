@@ -1,0 +1,47 @@
+---
+interface Props {
+  value: string;
+  label: string;
+  project: string;
+}
+const { value, label, project } = Astro.props;
+---
+
+<li class="metric">
+  <span class="value mono" data-count={value}>{value}</span>
+  <p class="text">
+    {label} <span class="proj mono">{project}</span>
+  </p>
+</li>
+
+<style>
+  .metric {
+    display: grid;
+    gap: 8px;
+    padding: 20px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+  .value {
+    font-size: clamp(2rem, 4vw, 2.75rem);
+    font-weight: 700;
+    line-height: 1;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  .text {
+    font-size: 0.9375rem;
+    line-height: 1.45;
+    color: var(--muted);
+  }
+  .proj {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink);
+  }
+</style>

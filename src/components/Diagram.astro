@@ -1,0 +1,185 @@
+---
+import type { Project } from '../data/projects';
+
+interface Props {
+  project: Project;
+}
+const { project } = Astro.props;
+const { main, side, sideLabel } = project.diagram;
+
+const LINE_H = 17;
+const PAD_Y = 14;
+const CHAR_W = 7; // rough width of a 13px glyph, used to wrap labels
+
+const wrap = (text: string, max: number): string[] => {
+  const lines: string[] = [];
+  let cur = '';
+  for (const word of text.split(' ')) {
+    const next = cur ? `${cur} ${word}` : word;
+    if (next.length > max && cur) {
+      lines.push(cur);
+      cur = word;
+    } else cur = next;
+  }
+  if (cur) lines.push(cur);
+  return lines;
+};
+
+interface Box {
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+  lines: string[];
+}
+
+// Lay boxes out left to right in rows; rows are joined by an elbow connector.
+const flow = (items: string[], cols: number, boxW: number, gapX: number, gapY: number, x0: number, y0: number) => {
+  const maxChars = Math.floor((boxW - 24) / CHAR_W);
+  const wrapped = items.map((t) => wrap(t, maxChars));
+  const rowCount = Math.ceil(items.length / cols);
+  const rowH: number[] = [];
+  for (let r = 0; r < rowCount; r++) {
+    rowH[r] = Math.max(...wrapped.slice(r * cols, (r + 1) * cols).map((l) => l.length)) * LINE_H + PAD_Y * 2;
+  }
+  const boxes: Box[] = wrapped.map((lines, i) => {
+    const r = Math.floor(i / cols);
+    const c = i % cols;
+    const y = y0 + rowH.slice(0, r).reduce((a, b) => a + b, 0) + r * gapY;
+    return { x: x0 + c * (boxW + gapX), y, w: boxW, h: rowH[r], lines };
+  });
+  const edges = boxes.slice(1).map((b, i) => {
+    const a = boxes[i];
+    if (a.y === b.y) return `M${a.x + a.w} ${a.y + a.h / 2}H${b.x}`;
+    const mid = a.y + a.h + gapY / 2;
+    return `M${a.x + a.w / 2} ${a.y + a.h}V${mid}H${b.x + b.w / 2}V${b.y}`;
+  });
+  const bottom = boxes.length ? Math.max(...boxes.map((b) => b.y + b.h)) : y0;
+  return { boxes, edges, bottom };
+};
+
+const build = (cols: number, width: number, boxW: number, gapX: number, x0: number) => {
+  const m = flow(main, cols, boxW, gapX, 40, x0, 8);
+  let height = m.bottom + 8;
+  let s: ReturnType<typeof flow> | null = null;
+  let labelY = 0;
+  if (side.length) {
+    labelY = m.bottom + 44;
+    s = flow(side, Math.min(cols === 1 ? 1 : side.length, cols), boxW, gapX, 40, x0, labelY + 14);
+    height = s.bottom + 8;
+  }
+  return { m, s, labelY, width, height };
+};
+
+const mainCols = main.length > 6 ? 4 : main.length > 4 ? 3 : main.length;
+const wideBox = mainCols === 4 ? 180 : mainCols === 3 ? 253 : Math.floor((840 - (mainCols - 1) * 40) / mainCols);
+const variants = [
+  { key: 'wide', ...build(mainCols, 840, wideBox, 40, 0) },
+  { key: 'narrow', ...build(1, 340, 300, 0, 20) },
+];
+const summary = `${project.name} architecture: ${main.join(' → ')}.${side.length ? ` ${sideLabel}: ${side.join(' → ')}.` : ''}`;
+---
+
+<figure class="diagram">
+  {
+    variants.map((v) => {
+      const marker = `arrow-${project.slug}-${v.key}`;
+      const groups = [{ g: v.m, side: false }, ...(v.s ? [{ g: v.s, side: true }] : [])];
+      return (
+        <svg class={`d-${v.key}`} viewBox={`0 0 ${v.width} ${v.height}`} role="img" aria-label={summary}>
+          <defs>
+            <marker id={marker} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+              <path d="M0 0L10 5L0 10z" fill="var(--accent)" />
+            </marker>
+          </defs>
+          {v.s && (
+            <text class="side-label" x={v.key === 'wide' ? 0 : 20} y={v.labelY}>
+              {sideLabel.toUpperCase()}
+            </text>
+          )}
+          {groups.map(({ g, side: isSide }) => (
+            <>
+              {g.edges.map((d) => (
+                <path d={d} fill="none" stroke="var(--accent)" stroke-width="2" marker-end={`url(#${marker})`} />
+              ))}
+              {g.boxes.map((b, i) => {
+                const end = !isSide && (i === 0 || i === g.boxes.length - 1);
+                return (
+                  <g>
+                    <rect
+                      x={b.x}
+                      y={b.y}
+                      width={b.w}
+                      height={b.h}
+                      rx="10"
+                      class={`box${end ? ' end' : ''}${isSide ? ' side' : ''}`}
+                    />
+                    <text text-anchor="middle">
+                      {b.lines.map((line, li) => (
+                        <tspan x={b.x + b.w / 2} y={b.y + PAD_Y + 12 + li * LINE_H}>
+                          {line}
+                        </tspan>
+                      ))}
+                    </text>
+                  </g>
+                );
+              })}
+            </>
+          ))}
+        </svg>
+      );
+    })
+  }
+</figure>
+
+<style>
+  .diagram {
+    margin: 0;
+    padding: 24px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+  }
+  svg {
+    width: 100%;
+    height: auto;
+    margin-inline: auto;
+  }
+  .d-wide {
+    display: none;
+  }
+  .d-narrow {
+    max-width: 420px;
+  }
+  @media (min-width: 900px) {
+    .d-wide {
+      display: block;
+    }
+    .d-narrow {
+      display: none;
+    }
+  }
+  .box {
+    fill: var(--bg);
+    stroke: var(--line);
+    stroke-width: 1.5;
+  }
+  .box.end {
+    stroke: var(--accent);
+  }
+  .box.side {
+    stroke-dasharray: 5 4;
+    stroke: var(--muted);
+  }
+  text {
+    font-family: var(--font-body);
+    font-size: 13px;
+    fill: var(--ink);
+  }
+  .side-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    fill: var(--muted);
+  }
+</style>

@@ -1,0 +1,71 @@
+---
+interface Props {
+  rows: { measure: string; result: string }[];
+}
+const { rows } = Astro.props;
+---
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th scope="col">Measure</th><th scope="col">Result</th></tr>
+    </thead>
+    <tbody>
+      {
+        rows.map((r) => (
+          <tr>
+            <th scope="row">{r.measure}</th>
+            <td>{r.result}</td>
+          </tr>
+        ))
+      }
+    </tbody>
+  </table>
+</div>
+
+<style>
+  .table-wrap {
+    overflow-x: auto;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+  }
+  th,
+  td {
+    padding: 14px 18px;
+    text-align: left;
+    vertical-align: top;
+    border-bottom: 1px solid var(--line);
+  }
+  tbody tr:last-child > * {
+    border-bottom: 0;
+  }
+  thead th {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: var(--surface-2);
+  }
+  tbody th {
+    font-weight: 600;
+    width: 40%;
+  }
+  td {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+  }
+  @media (max-width: 560px) {
+    th,
+    td {
+      padding: 12px;
+    }
+  }
+</style>

@@ -1,0 +1,74 @@
+---
+import { about, sections } from '../data/site';
+---
+
+<section id="about" class="section" aria-labelledby="about-title">
+  <div class="wrap grid">
+    <div class="text reveal">
+      <h2 id="about-title">{sections.about.heading}</h2>
+      <div class="prose">
+        {about.paragraphs.map((p) => <p>{p}</p>)}
+      </div>
+    </div>
+
+    <!-- OPTIONAL PHOTO SLOT: add a profile photo here only if the owner supplies one. -->
+    <aside class="notes reveal" aria-label="Case notes">
+      <p class="label">Case notes</p>
+      <dl>
+        {
+          about.notes.map((n) => (
+            <div class="row">
+              <dt>{n.key}</dt>
+              <dd>{n.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </aside>
+  </div>
+</section>
+
+<style>
+  .grid {
+    display: grid;
+    gap: 40px;
+    align-items: start;
+  }
+  .text {
+    display: grid;
+    gap: 24px;
+  }
+  .prose {
+    display: grid;
+    gap: 16px;
+  }
+  .notes {
+    padding: 24px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+  }
+  dl {
+    margin-top: 16px;
+    display: grid;
+    gap: 16px;
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+  }
+  dt {
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 0.75rem;
+    color: var(--accent);
+  }
+  dd {
+    margin-top: 2px;
+  }
+  @media (min-width: 900px) {
+    .grid {
+      grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+      gap: 64px;
+    }
+  }
+</style>

@@ -1,0 +1,101 @@
+---
+import { site, hero } from '../data/site';
+import Icon from './Icon.astro';
+import MetricCounter from './MetricCounter.astro';
+---
+
+<section class="hero" aria-labelledby="hero-title">
+  <div class="wrap">
+    <p class="label eyebrow">{hero.eyebrow}</p>
+    <h1 id="hero-title">{site.name}</h1>
+    <p class="role">{site.role}</p>
+    <span class="thread thread-short" aria-hidden="true"></span>
+    <p class="tagline">{hero.tagline}</p>
+    <p class="subline">{hero.subline}</p>
+
+    <div class="actions">
+      <a class="btn btn-primary" href="#work">View my work <Icon name="arrow" size={18} /></a>
+      <a class="btn" href={site.resume} target="_blank" rel="noopener noreferrer">
+        Resume <Icon name="download" size={18} />
+      </a>
+      <ul class="icon-links">
+        <li>
+          <a class="icon-link" href={site.github} target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+            <Icon name="github" />
+          </a>
+        </li>
+        <li>
+          <a class="icon-link" href={site.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
+            <Icon name="linkedin" />
+          </a>
+        </li>
+        <li>
+          <a class="icon-link" href={`mailto:${site.email}`} aria-label="Email">
+            <Icon name="mail" />
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <ul class="metrics" aria-label="Headline metrics">
+      {hero.metrics.map((m) => <MetricCounter {...m} />)}
+    </ul>
+  </div>
+</section>
+
+<style>
+  .hero {
+    padding-block: 56px 24px;
+  }
+  .eyebrow {
+    margin-bottom: 16px;
+  }
+  h1 {
+    font-size: clamp(3rem, 9vw, 6rem);
+    letter-spacing: -0.035em;
+    line-height: 0.98;
+  }
+  .role {
+    margin: 12px 0 20px;
+    font-family: var(--font-mono);
+    font-size: 1.0625rem;
+    letter-spacing: 0.04em;
+    color: var(--muted);
+  }
+  .tagline {
+    margin-top: 28px;
+    font-family: var(--font-head);
+    font-size: clamp(1.5rem, 3.2vw, 2.25rem);
+    line-height: 1.2;
+    letter-spacing: -0.015em;
+    max-width: 24ch;
+  }
+  .subline {
+    margin-top: 16px;
+    color: var(--muted);
+    max-width: 62ch;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+    margin-top: 28px;
+  }
+  .icon-links {
+    margin-left: 4px;
+  }
+  .metrics {
+    display: grid;
+    gap: 16px;
+    margin-top: 48px;
+  }
+  @media (min-width: 768px) {
+    .hero {
+      padding-block: 72px 32px;
+    }
+    .metrics {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+</style>

@@ -1,0 +1,61 @@
+---
+import { site, sections } from '../data/site';
+import Icon from './Icon.astro';
+---
+
+<section id="contact" class="section" aria-labelledby="contact-title">
+  <div class="wrap reveal">
+    <h2 id="contact-title">{sections.contact.heading}</h2>
+    <p class="text">{sections.contact.text}</p>
+
+    <div class="mail-row">
+      <a class="mail link" href={`mailto:${site.email}`}>{site.email}</a>
+      <button type="button" class="btn btn-sm copy" data-copy={site.email}>
+        <Icon name="copy" size={16} /><span data-copy-label aria-live="polite">Copy</span>
+      </button>
+    </div>
+
+    <ul class="social">
+      <li>
+        <a class="btn" href={site.github} target="_blank" rel="noopener noreferrer">
+          <Icon name="github" size={18} /> GitHub
+        </a>
+      </li>
+      <li>
+        <a class="btn" href={site.linkedin} target="_blank" rel="noopener noreferrer">
+          <Icon name="linkedin" size={18} /> LinkedIn
+        </a>
+      </li>
+    </ul>
+  </div>
+</section>
+
+<style>
+  .text {
+    margin-top: 16px;
+    color: var(--muted);
+  }
+  .mail-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+    margin-top: 32px;
+  }
+  .mail {
+    font-family: var(--font-head);
+    font-weight: 600;
+    font-size: clamp(1.375rem, 5.2vw, 2.75rem);
+    letter-spacing: -0.02em;
+    overflow-wrap: anywhere;
+  }
+  :global(html:not(.js)) .copy {
+    display: none;
+  }
+  .social {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 24px;
+  }
+</style>

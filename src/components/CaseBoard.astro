@@ -1,0 +1,197 @@
+---
+import { projects } from '../data/projects';
+import { sections } from '../data/site';
+import ProjectCard from './ProjectCard.astro';
+
+// Pin positions inside the 1000x100 string canvas (x is a third-column centre, y matches each card's top offset).
+const pins = [
+  { x: 167, y: 36 },
+  { x: 500, y: 68 },
+  { x: 833, y: 44 },
+];
+const d = `M${pins[0].x} ${pins[0].y} C260 ${pins[0].y + 64} 400 ${pins[1].y + 32} ${pins[1].x} ${pins[1].y} C600 ${pins[1].y - 32} 740 ${pins[2].y + 16} ${pins[2].x} ${pins[2].y}`;
+---
+
+<section id="work" class="section" aria-labelledby="work-title">
+  <div class="wrap">
+    <header class="section-head reveal">
+      <h2 id="work-title">{sections.work.heading}</h2>
+      <p class="sub">{sections.work.sub}</p>
+    </header>
+
+    <div class="board" data-board>
+      <svg class="string-svg" viewBox="0 0 1000 100" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+        <path class="string" data-string d={d} pathLength="1" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round"></path>
+        {pins.map((p) => <circle class="pin" data-pin cx={p.x} cy={p.y} r="6" fill="var(--accent)" />)}
+      </svg>
+
+      <ol class="cards">
+        {
+          projects.map((p) => (
+            <li class="slot">
+              <ProjectCard project={p} />
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </div>
+</section>
+
+<style>
+  .board {
+    position: relative;
+  }
+  .string-svg {
+    display: none;
+  }
+
+  /* Mobile / tablet: stacked cards with one thread down the left edge. */
+  .cards {
+    position: relative;
+    display: grid;
+    gap: 24px;
+    padding-left: 32px;
+  }
+  .cards::before {
+    content: '';
+    position: absolute;
+    left: 8px;
+    top: 28px;
+    bottom: 28px;
+    width: 2px;
+    background: var(--accent);
+  }
+  .slot {
+    position: relative;
+  }
+  .slot::before {
+    content: '';
+    position: absolute;
+    left: -29px;
+    top: 22px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 4px var(--bg);
+  }
+
+  /* Desktop: pinned cards with a red string between the pins. */
+  @media (min-width: 1024px) {
+    .string-svg {
+      display: block;
+      position: absolute;
+      inset: 0 0 auto 0;
+      width: 100%;
+      height: 100px;
+      overflow: visible;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .cards {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      padding-left: 0;
+      align-items: start;
+    }
+    .cards::before,
+    .slot::before {
+      display: none;
+    }
+    .slot:nth-child(1) {
+      margin-top: 24px;
+      --rot: -2deg;
+    }
+    .slot:nth-child(2) {
+      margin-top: 56px;
+      --rot: 1.5deg;
+    }
+    .slot:nth-child(3) {
+      margin-top: 32px;
+      --rot: -1deg;
+    }
+    .slot :global(.project-card) {
+      padding-top: 36px;
+      transform: rotate(var(--rot));
+    }
+    .slot:hover :global(.project-card),
+    .slot:focus-within :global(.project-card) {
+      transform: rotate(0deg) translateY(-6px);
+      box-shadow: 0 2px 4px rgb(0 0 0 / 0.08), 0 18px 36px rgb(0 0 0 / 0.14);
+    }
+  }
+
+  /* String draws itself once the board is armed by the script and scrolled into view. */
+  .board[data-armed] .string {
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+  .board[data-armed].in .string {
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 900ms ease-out;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .slot:hover :global(.project-card),
+    .slot:focus-within :global(.project-card) {
+      transform: rotate(var(--rot, 0deg));
+    }
+  }
+</style>
+
+<script>
+  const board = document.querySelector<HTMLElement>('[data-board]');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const desktop = matchMedia('(min-width: 1024px)');
+
+  if (board && !reduce) {
+    const path = board.querySelector<SVGPathElement>('[data-string]')!;
+    const pins = [...board.querySelectorAll<SVGCircleElement>('[data-pin]')];
+    const slots = [...board.querySelectorAll<HTMLElement>('.slot')];
+    const xs = pins.map((p) => Number(p.getAttribute('cx')));
+    const base = pins.map((p) => Number(p.getAttribute('cy')));
+    const ys = [...base];
+
+    const draw = () => {
+      pins.forEach((p, i) => p.setAttribute('cy', String(ys[i])));
+      path.setAttribute(
+        'd',
+        `M${xs[0]} ${ys[0]} C260 ${ys[0] + 64} 400 ${ys[1] + 32} ${xs[1]} ${ys[1]} C600 ${ys[1] - 32} 740 ${ys[2] + 16} ${xs[2]} ${ys[2]}`,
+      );
+    };
+
+    // The string end follows the pin as its card lifts.
+    const move = (i: number, to: number) => {
+      const from = ys[i];
+      const t0 = performance.now();
+      const step = (now: number) => {
+        const t = Math.min((now - t0) / 180, 1);
+        ys[i] = from + (to - from) * (1 - Math.pow(1 - t, 3));
+        draw();
+        if (t < 1) requestAnimationFrame(step);
+      };
+      requestAnimationFrame(step);
+    };
+
+    slots.forEach((slot, i) => {
+      const lift = () => desktop.matches && move(i, base[i] - 6);
+      const drop = () => move(i, base[i]);
+      slot.addEventListener('mouseenter', lift);
+      slot.addEventListener('mouseleave', drop);
+      slot.addEventListener('focusin', lift);
+      slot.addEventListener('focusout', drop);
+    });
+
+    board.setAttribute('data-armed', '');
+    new IntersectionObserver(
+      (entries, io) => {
+        if (entries[0].isIntersecting) {
+          board.classList.add('in');
+          io.disconnect();
+        }
+      },
+      { threshold: 0.2 },
+    ).observe(board);
+  }
+</script>

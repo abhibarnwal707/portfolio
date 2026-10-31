@@ -1,0 +1,144 @@
+---
+import { site } from '../data/site';
+import Icon from './Icon.astro';
+import ThemeToggle from './ThemeToggle.astro';
+
+const links = [
+  { label: 'Work', href: '/#work' },
+  { label: 'Skills', href: '/#skills' },
+  { label: 'About', href: '/#about' },
+  { label: 'Contact', href: '/#contact' },
+];
+---
+
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href="/">{site.name}</a>
+
+    <nav class="nav-desktop" aria-label="Primary">
+      <ul>
+        {links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+      </ul>
+    </nav>
+
+    <div class="actions">
+      <ThemeToggle />
+      <a class="btn btn-sm resume" href={site.resume} target="_blank" rel="noopener noreferrer">Resume</a>
+
+      <details class="menu" data-menu>
+        <summary aria-label="Menu">
+          <span class="open"><Icon name="menu" /></span>
+          <span class="close"><Icon name="close" /></span>
+        </summary>
+        <nav class="panel" aria-label="Primary mobile">
+          <ul>
+            {links.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+            <li><a href={site.resume} target="_blank" rel="noopener noreferrer">Resume</a></li>
+          </ul>
+        </nav>
+      </details>
+    </div>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: color-mix(in srgb, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    height: var(--header-h);
+  }
+  .brand {
+    font-family: var(--font-head);
+    font-weight: 600;
+    font-size: 1.25rem;
+    letter-spacing: -0.02em;
+    text-decoration: none;
+    margin-right: auto;
+  }
+  .nav-desktop ul {
+    display: flex;
+    gap: 4px;
+  }
+  .nav-desktop a {
+    display: block;
+    padding: 8px 12px;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    text-decoration: none;
+    transition: background-color 180ms ease-out;
+  }
+  .nav-desktop a:hover {
+    background: var(--surface-2);
+  }
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .menu {
+    position: relative;
+    display: none;
+  }
+  .menu summary {
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+    cursor: pointer;
+    list-style: none;
+  }
+  .menu summary::-webkit-details-marker {
+    display: none;
+  }
+  .menu .close,
+  .menu[open] .open {
+    display: none;
+  }
+  .menu[open] .close {
+    display: block;
+  }
+  .panel {
+    position: absolute;
+    right: 0;
+    top: 48px;
+    min-width: 200px;
+    padding: 8px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+  }
+  .panel a {
+    display: block;
+    padding: 12px;
+    border-radius: 10px;
+    text-decoration: none;
+  }
+  .panel a:hover {
+    background: var(--surface-2);
+  }
+
+  @media (max-width: 767px) {
+    .nav-desktop,
+    .resume {
+      display: none;
+    }
+    .menu {
+      display: block;
+    }
+  }
+</style>

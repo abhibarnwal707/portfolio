@@ -1,0 +1,308 @@
+---
+import Base from '../../layouts/Base.astro';
+import Icon from '../../components/Icon.astro';
+import Diagram from '../../components/Diagram.astro';
+import ResultsTable from '../../components/ResultsTable.astro';
+import { projects } from '../../data/projects';
+
+export function getStaticPaths() {
+  return projects.map((project, i) => ({
+    params: { slug: project.slug },
+    props: { project, prev: projects[i - 1], next: projects[i + 1] },
+  }));
+}
+
+const { project, prev, next } = Astro.props;
+const toc = [
+  { id: 'problem', label: 'The problem' },
+  { id: 'built', label: 'What I built' },
+  { id: 'results', label: 'Results' },
+  { id: 'decisions', label: 'Engineering decisions' },
+  { id: 'stack', label: 'Stack' },
+];
+---
+
+<Base title={`${project.name} | Abhishek Kumar`} description={project.oneLiner}>
+  <article class="case">
+    <div class="wrap">
+      <nav class="crumbs label" aria-label="Breadcrumb">
+        <a href="/">Case file</a> <span aria-hidden="true">/</span> <span aria-current="page">{project.number}</span>
+      </nav>
+
+      <header class="title-block">
+        <p class="label">CASE {project.number}</p>
+        <h1>{project.title}</h1>
+        <span class="thread thread-short" aria-hidden="true"></span>
+        <p class="oneliner">{project.oneLiner}</p>
+        <ul class="tags" aria-label="Tags">
+          {project.tags.map((t) => <li class="tag">{t}</li>)}
+        </ul>
+        <ul class="links">
+          {
+            project.links.map((l, i) => (
+              <li>
+                <a class={`btn${i === 0 ? ' btn-primary' : ''}`} href={l.href} target="_blank" rel="noopener noreferrer">
+                  {l.label} <Icon name="external" size={16} />
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+        <ul class="chips metrics" aria-label="Headline metrics">
+          {
+            project.metrics.map((m) => (
+              <li class="chip">
+                <span class="chip-v">{m.value}</span>
+                <span class="chip-l">{m.label}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </header>
+
+      <div class="body">
+        <aside class="toc" aria-label="On this page">
+          <p class="label">On this page</p>
+          <ul>
+            {toc.map((t) => <li><a href={`#${t.id}`}>{t.label}</a></li>)}
+          </ul>
+        </aside>
+
+        <div class="content">
+          <section id="problem" class="block" aria-labelledby="problem-h">
+            <h2 id="problem-h">The problem</h2>
+            <p>{project.problem}</p>
+          </section>
+
+          <section id="built" class="block" aria-labelledby="built-h">
+            <h2 id="built-h">What I built</h2>
+            <ol class="built">
+              {
+                project.built.map((b) => (
+                  <li>
+                    <strong>{b.title}</strong> {b.text}
+                  </li>
+                ))
+              }
+            </ol>
+            <Diagram project={project} />
+            <!-- SCREENSHOT SLOT: optional real screenshot of the running project; do not use a mock-up. -->
+          </section>
+
+          <section id="results" class="block" aria-labelledby="results-h">
+            <h2 id="results-h">Results</h2>
+            <ResultsTable rows={project.results} />
+          </section>
+
+          <section id="decisions" class="block" aria-labelledby="decisions-h">
+            <h2 id="decisions-h">Engineering decisions</h2>
+            <ul class="decisions">
+              {project.decisions.map((d) => <li>{d}</li>)}
+            </ul>
+          </section>
+
+          <section id="stack" class="block" aria-labelledby="stack-h">
+            <h2 id="stack-h">Stack</h2>
+            <ul class="tags">
+              {project.stack.map((s) => <li class="tag">{s}</li>)}
+            </ul>
+          </section>
+
+          <nav class="pager" aria-label="More cases">
+            {
+              prev ? (
+                <a class="pager-link" href={`/projects/${prev.slug}`} rel="prev">
+                  <span class="label">← Previous · CASE {prev.number}</span>
+                  <span class="pager-title">{prev.name}</span>
+                </a>
+              ) : (
+                <span />
+              )
+            }
+            {
+              next ? (
+                <a class="pager-link next" href={`/projects/${next.slug}`} rel="next">
+                  <span class="label">Next · CASE {next.number} →</span>
+                  <span class="pager-title">{next.name}</span>
+                </a>
+              ) : (
+                <span />
+              )
+            }
+          </nav>
+        </div>
+      </div>
+    </div>
+  </article>
+</Base>
+
+<style>
+  .case {
+    padding-block: 32px 80px;
+  }
+  .crumbs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 32px;
+  }
+  .crumbs a {
+    color: var(--muted);
+  }
+  .crumbs [aria-current] {
+    color: var(--ink);
+  }
+  .title-block {
+    display: grid;
+    gap: 16px;
+    justify-items: start;
+  }
+  h1 {
+    font-size: clamp(2rem, 5.5vw, 3.75rem);
+    letter-spacing: -0.03em;
+    max-width: 20ch;
+  }
+  .oneliner {
+    font-size: 1.125rem;
+    color: var(--muted);
+  }
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .metrics {
+    width: 100%;
+    margin-top: 16px;
+  }
+  .body {
+    display: grid;
+    gap: 40px;
+    margin-top: 64px;
+  }
+  .toc {
+    display: none;
+  }
+  .content {
+    display: grid;
+    gap: 0;
+    min-width: 0;
+  }
+  .block {
+    display: grid;
+    gap: 20px;
+    padding-block: 40px;
+    position: relative;
+  }
+  /* red thread between sections */
+  .block + .block::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, var(--accent) 0 72px, var(--line) 72px);
+  }
+  .block:first-child {
+    padding-top: 0;
+  }
+  h2 {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+  }
+  .built {
+    display: grid;
+    gap: 14px;
+    padding-left: 1.5rem;
+    list-style: decimal;
+  }
+  .built li::marker {
+    font-family: var(--font-mono);
+    color: var(--accent);
+  }
+  .decisions {
+    display: grid;
+    gap: 12px;
+  }
+  .decisions li {
+    position: relative;
+    padding-left: 24px;
+  }
+  .decisions li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.7em;
+    width: 10px;
+    height: 2px;
+    background: var(--accent);
+  }
+  .pager {
+    display: grid;
+    gap: 16px;
+    margin-top: 40px;
+    padding-top: 32px;
+    border-top: 1px solid var(--line);
+  }
+  .pager-link {
+    display: grid;
+    gap: 4px;
+    padding: 16px 20px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    text-decoration: none;
+    transition: transform 180ms ease-out, border-color 180ms ease-out;
+  }
+  .pager-link:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent);
+  }
+  .pager-title {
+    font-family: var(--font-head);
+    font-size: 1.375rem;
+    font-weight: 600;
+  }
+  .next {
+    text-align: right;
+  }
+
+  @media (min-width: 640px) {
+    .pager {
+      grid-template-columns: 1fr 1fr;
+    }
+    .metrics {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  @media (min-width: 1024px) {
+    .body {
+      grid-template-columns: 200px minmax(0, 1fr);
+      gap: 56px;
+    }
+    .toc {
+      display: block;
+      position: sticky;
+      top: calc(var(--header-h) + 24px);
+      align-self: start;
+    }
+    .toc ul {
+      display: grid;
+      gap: 4px;
+      margin-top: 12px;
+      border-left: 2px solid var(--line);
+    }
+    .toc a {
+      display: block;
+      padding: 6px 14px;
+      margin-left: -2px;
+      border-left: 2px solid transparent;
+      font-size: 0.9375rem;
+      color: var(--muted);
+      text-decoration: none;
+    }
+    .toc a:hover {
+      color: var(--ink);
+      border-left-color: var(--accent);
+    }
+  }
+</style>

@@ -1,0 +1,71 @@
+---
+import { education, certifications } from '../data/education';
+import { sections } from '../data/site';
+import Icon from './Icon.astro';
+---
+
+<section id="education" class="section" aria-labelledby="edu-title">
+  <div class="wrap">
+    <header class="section-head reveal">
+      <h2 id="edu-title">{sections.education.heading}</h2>
+    </header>
+
+    {
+      education.map((e) => (
+        <p class="edu reveal">
+          <strong>{e.credential}</strong>, {e.school} <span class="muted">· {e.years} · {e.grade}</span>
+        </p>
+      ))
+    }
+
+    <ul class="certs">
+      {
+        certifications.map((c) => (
+          <li class="cert reveal">
+            {c.url ? (
+              <a class="title link" href={c.url} target="_blank" rel="noopener noreferrer">
+                {c.title} <Icon name="external" size={14} />
+              </a>
+            ) : (
+              <span class="title">{c.title}</span>
+            )}
+            {c.issuer && <span class="issuer mono">{c.issuer}</span>}
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</section>
+
+<style>
+  .edu {
+    max-width: none;
+  }
+  .certs {
+    display: grid;
+    gap: 16px;
+    margin-top: 32px;
+  }
+  .cert {
+    display: grid;
+    gap: 4px;
+    padding: 16px 20px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+  }
+  .title {
+    font-weight: 600;
+  }
+  .issuer {
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  @media (min-width: 768px) {
+    .certs {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+</style>
