@@ -337,7 +337,7 @@ const graphData = JSON.stringify({
         g.addEventListener('click', (e) => {
           e.stopPropagation();
           if (n.kind === 'project') {
-            location.href = `/projects/${n.slug}`;
+            location.href = `/projects/${n.slug}/`;
             return;
           }
           // tap toggles the highlight for touch screens

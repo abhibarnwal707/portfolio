@@ -31,13 +31,15 @@ Drop your PDF at `public/resume.pdf`. The Resume button already points to `/resu
 - Case-study screenshots: search for `SCREENSHOT SLOT` in `src/pages/projects/[slug].astro`.
 - Profile photo: search for `OPTIONAL PHOTO SLOT` in `src/components/About.astro`.
 
-## Deploy to Cloudflare Pages
+## Deploy to Cloudflare
 
-1. Push the repo to GitHub.
-2. Cloudflare dashboard: **Workers & Pages → Create → Pages → Connect to Git**, pick the repo.
-3. Build settings: **Framework preset** Astro, **Build command** `npm run build`, **Build output directory** `dist`.
-4. Environment variable: `NODE_VERSION` set to the Node major you use locally (`node -v`, currently 24).
-5. After the first deploy, copy the `*.pages.dev` URL into `site` in `astro.config.mjs`, commit and push. This sets canonical URLs, the sitemap and the social-card image URLs.
-6. Pushes to `main` now deploy automatically.
+Live at https://portfolio.abhibarnwal707.workers.dev (Cloudflare Workers static assets, connected to this GitHub repo).
+
+1. Push to `main`; Cloudflare builds with `npm run build` and serves `dist/`.
+2. `wrangler.jsonc` sets the asset directory and serves `404.html` for unknown URLs. Its `name` must match the Worker name in the dashboard.
+3. Set the `NODE_VERSION` build variable to your local Node major (`node -v`, currently 24).
+4. If you add a custom domain, update `SITE` in `astro.config.mjs` (canonical URLs, sitemap, social card).
 
 `public/_headers` sets long-lived caching for `/_astro/*`, `nosniff`, a strict referrer policy and a restrictive permissions policy. There is no CSP because the inline theme script would need a hash or nonce.
+
+Deploying to Cloudflare Pages instead also works: framework preset Astro, build command `npm run build`, output directory `dist`.

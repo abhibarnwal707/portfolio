@@ -111,7 +111,7 @@ const toc = [
           <nav class="pager" aria-label="More cases">
             {
               prev ? (
-                <a class="pager-link" href={`/projects/${prev.slug}`} rel="prev">
+                <a class="pager-link" href={`/projects/${prev.slug}/`} rel="prev">
                   <span class="label">← Previous · CASE {prev.number}</span>
                   <span class="pager-title">{prev.name}</span>
                 </a>
@@ -121,7 +121,7 @@ const toc = [
             }
             {
               next ? (
-                <a class="pager-link next" href={`/projects/${next.slug}`} rel="next">
+                <a class="pager-link next" href={`/projects/${next.slug}/`} rel="next">
                   <span class="label">Next · CASE {next.number} →</span>
                   <span class="pager-title">{next.name}</span>
                 </a>

@@ -2,8 +2,8 @@
 import { defineConfig } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
-// TODO(owner): replace with the final *.pages.dev (or custom) URL after the first Cloudflare deploy.
-const SITE = 'https://abhishek-kumar.pages.dev';
+// Deployed Cloudflare URL; change this if you add a custom domain.
+const SITE = 'https://portfolio.abhibarnwal707.workers.dev';
 
 export default defineConfig({
   site: SITE,
