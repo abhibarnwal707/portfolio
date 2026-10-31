@@ -251,7 +251,10 @@ const graphData = JSON.stringify({
 
     const build = () => {
       const W = canvas.offsetWidth || 700;
-      const H = W < 560 ? 520 : 540;
+      const narrow = W < 560;
+      const H = narrow ? 760 : 640;
+      // Label half-width (12px Inter is roughly 6px a glyph) so collision keeps text from overlapping.
+      const halfLabel = (n: N) => (n.kind === 'project' ? n.r : Math.max(n.r, n.label.length * (narrow ? 2.6 : 3.1)));
 
       const nodes: N[] = [
         ...data.projects.map((p): N => ({ id: p.id, label: p.name, kind: 'project', slug: p.id, r: 24 })),
@@ -262,19 +265,20 @@ const graphData = JSON.stringify({
       // Projects anchor along the middle; skills settle around the projects that use them.
       const anchor: Record<string, number> = { redstring: 0.2, papertrail: 0.5, cartrank: 0.8 };
       const sim = forceSimulation<N>(nodes)
-        .force('link', forceLink<N, L>(links).id((n) => n.id).distance(W < 560 ? 70 : 100).strength(0.6))
-        .force('charge', forceManyBody<N>().strength((n) => (n.kind === 'project' ? -420 : -70)))
-        .force('collide', forceCollide<N>().radius((n) => n.r + (n.kind === 'project' ? 18 : 24)))
-        .force('x', forceX<N>((n) => (n.kind === 'project' ? W * anchor[n.id] : W / 2)).strength((n) => (n.kind === 'project' ? 0.35 : 0.04)))
-        .force('y', forceY<N>(H / 2).strength((n) => (n.kind === 'project' ? 0.2 : 0.05)))
+        .force('link', forceLink<N, L>(links).id((n) => n.id).distance(narrow ? 80 : 130).strength(0.35))
+        .force('charge', forceManyBody<N>().strength((n) => (n.kind === 'project' ? -600 : -140)))
+        .force('collide', forceCollide<N>().radius((n) => halfLabel(n) + (n.kind === 'project' ? 26 : 8)))
+        .force('x', forceX<N>((n) => (n.kind === 'project' ? W * anchor[n.id] : W / 2)).strength((n) => (n.kind === 'project' ? 0.5 : 0.03)))
+        .force('y', forceY<N>(H / 2).strength((n) => (n.kind === 'project' ? 0.25 : 0.04)))
         .stop();
       // Settle it up front so the layout is stable and identical with reduced motion.
-      for (let i = 0; i < 400; i++) sim.tick();
+      for (let i = 0; i < 500; i++) sim.tick();
 
       const pad = 14;
       nodes.forEach((n) => {
-        n.x = Math.max(n.r + pad, Math.min(W - n.r - pad, n.x ?? W / 2));
-        n.y = Math.max(n.r + pad, Math.min(H - n.r - pad, n.y ?? H / 2));
+        const hx = halfLabel(n) + pad;
+        n.x = Math.max(hx, Math.min(W - hx, n.x ?? W / 2));
+        n.y = Math.max(n.r + pad + 18, Math.min(H - n.r - pad - 18, n.y ?? H / 2));
       });
 
       const svg = el('svg', { viewBox: `0 0 ${W} ${H}`, role: 'group', 'aria-label': 'Skills connection map. The grouped list shows the same information as text.' });

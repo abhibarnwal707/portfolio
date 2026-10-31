@@ -1,43 +1,43 @@
-# Astro Starter Kit: Minimal
+# Abhishek Kumar | Portfolio
+
+A fully static portfolio built with [Astro](https://astro.build): a "case file" site with light and dark themes, three case studies and a skills connection map. No backend, no analytics, no third-party runtime requests (fonts are self-hosted).
+
+## Run locally
 
 ```sh
-npm create astro@latest -- --template minimal
+npm install
+npm run dev       # dev server on http://localhost:4321
+npm run build     # static output in dist/
+npm run preview   # serve the built site
 ```
 
-> 🧑‍🚀 **Seasoned astronaut?** Delete this file. Have fun!
+## Edit content
 
-## 🚀 Project Structure
+All copy lives in `src/data/`. Components only render it.
 
-Inside of your Astro project, you'll see the following folders and files:
+| File | What it holds |
+|---|---|
+| `site.ts` | name, role, links, meta, hero, section intros, About |
+| `projects.ts` | the three case studies (text, metrics, results, diagram steps) |
+| `skills.ts` | skills graph nodes and which projects use them |
+| `education.ts` | education and certifications (add a `url` to a certification to link it) |
 
-```text
-/
-├── public/
-├── src/
-│   └── pages/
-│       └── index.astro
-└── package.json
-```
+## Resume
 
-Astro looks for `.astro` or `.md` files in the `src/pages/` directory. Each page is exposed as a route based on its file name.
+Drop your PDF at `public/resume.pdf`. The Resume button already points to `/resume.pdf`; until the file exists it will 404.
 
-There's nothing special about `src/components/`, but that's where we like to put any Astro/React/Vue/Svelte/Preact components.
+## Optional slots
 
-Any static assets, like images, can be placed in the `public/` directory.
+- Case-study screenshots: search for `SCREENSHOT SLOT` in `src/pages/projects/[slug].astro`.
+- Profile photo: search for `OPTIONAL PHOTO SLOT` in `src/components/About.astro`.
 
-## 🧞 Commands
+## Deploy to Cloudflare Pages
 
-All commands are run from the root of the project, from a terminal:
+1. Push the repo to GitHub.
+2. Cloudflare dashboard: **Workers & Pages → Create → Pages → Connect to Git**, pick the repo.
+3. Build settings: **Framework preset** Astro, **Build command** `npm run build`, **Build output directory** `dist`.
+4. Environment variable: `NODE_VERSION` set to the Node major you use locally (`node -v`, currently 24).
+5. After the first deploy, copy the `*.pages.dev` URL into `site` in `astro.config.mjs`, commit and push. This sets canonical URLs, the sitemap and the social-card image URLs.
+6. Pushes to `main` now deploy automatically.
 
-| Command                   | Action                                           |
-| :------------------------ | :----------------------------------------------- |
-| `npm install`             | Installs dependencies                            |
-| `npm run dev`             | Starts local dev server at `localhost:4321`      |
-| `npm run build`           | Build your production site to `./dist/`          |
-| `npm run preview`         | Preview your build locally, before deploying     |
-| `npm run astro ...`       | Run CLI commands like `astro add`, `astro check` |
-| `npm run astro -- --help` | Get help using the Astro CLI                     |
-
-## 👀 Want to learn more?
-
-Feel free to check [our documentation](https://docs.astro.build) or jump into our [Discord server](https://astro.build/chat).
+`public/_headers` sets long-lived caching for `/_astro/*`, `nosniff`, a strict referrer policy and a restrictive permissions policy. There is no CSP because the inline theme script would need a hash or nonce.
