@@ -26,46 +26,40 @@ const { rows } = Astro.props;
 <style>
   .table-wrap {
     overflow-x: auto;
-    border: 1px solid var(--line);
     border-radius: var(--radius);
     background: var(--surface);
   }
   table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.9375rem;
   }
   th,
   td {
-    padding: 14px 18px;
+    padding: 16px 20px;
     text-align: left;
     vertical-align: top;
-    border-bottom: 1px solid var(--line);
+    border-bottom: 1px solid var(--surface-2); /* taste-skill-ignore: a real table */
   }
   tbody tr:last-child > * {
     border-bottom: 0;
   }
   thead th {
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    font-weight: 500;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
+    font-size: var(--step-small);
+    font-weight: 600;
     color: var(--muted);
     background: var(--surface-2);
   }
   tbody th {
-    font-weight: 600;
-    width: 40%;
+    font-weight: 500;
+    width: 42%;
   }
   td {
-    font-family: var(--font-mono);
-    font-size: 0.875rem;
+    font-variant-numeric: tabular-nums lining-nums;
   }
   @media (max-width: 560px) {
     th,
     td {
-      padding: 12px;
+      padding: 12px 14px;
     }
   }
 </style>

@@ -1,74 +1,78 @@
 ---
-import { about, sections } from '../data/site';
+import { about, sections, site } from '../data/site';
 ---
 
-<section id="about" class="section" aria-labelledby="about-title">
-  <div class="wrap grid">
-    <div class="text reveal">
-      <h2 id="about-title">{sections.about.heading}</h2>
-      <div class="prose">
-        {about.paragraphs.map((p) => <p>{p}</p>)}
-      </div>
-    </div>
-
-    <!-- OPTIONAL PHOTO SLOT: add a profile photo here only if the owner supplies one. -->
-    <aside class="notes reveal" aria-label="Case notes">
-      <p class="label">Case notes</p>
-      <dl>
-        {
-          about.notes.map((n) => (
-            <div class="row">
-              <dt>{n.key}</dt>
-              <dd>{n.value}</dd>
-            </div>
-          ))
-        }
-      </dl>
-    </aside>
+<section id="about" class="about section frame" aria-labelledby="about-title">
+  <!-- OPTIONAL PHOTO SLOT: a round portrait (44px) above the letter, only if the owner supplies one. -->
+  <div class="letter" data-reveal-group>
+    <h2 id="about-title" data-reveal>{sections.about.heading}</h2>
+    {about.paragraphs.map((p, i) => <p data-reveal style={`--i:${i + 1}`}>{p}</p>)}
+    <p class="sign" data-reveal style="--i:4">
+      <span class="name">{site.name}</span>
+      <span class="small muted">{site.role}, {site.location}</span>
+    </p>
   </div>
+
+  <dl class="notes" data-reveal-group aria-label="Case notes">
+    {
+      about.notes.map((n, i) => (
+        <div data-reveal style={`--i:${i}`}>
+          <dt>{n.key}</dt>
+          <dd>{n.value}</dd>
+        </div>
+      ))
+    }
+  </dl>
 </section>
 
 <style>
-  .grid {
+  .about {
     display: grid;
-    gap: 40px;
+    gap: 64px;
     align-items: start;
   }
-  .text {
+  .letter {
     display: grid;
-    gap: 24px;
+    gap: 22px;
+    max-width: 600px;
   }
-  .prose {
+  .letter h2 {
+    margin-bottom: 8px;
+  }
+  .sign {
     display: grid;
-    gap: 16px;
+    gap: 4px;
+    margin-top: 12px;
+  }
+  .name {
+    font-style: italic;
+    font-size: var(--step-lead);
   }
   .notes {
-    padding: 24px;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow);
-  }
-  dl {
-    margin-top: 16px;
     display: grid;
-    gap: 16px;
-    font-family: var(--font-mono);
-    font-size: 0.875rem;
+    gap: 14px;
+    padding: 28px 32px;
+    background: var(--surface);
+    border-radius: var(--radius);
+  }
+  .notes div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 12px;
   }
   dt {
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-size: 0.75rem;
-    color: var(--accent);
+    color: var(--muted);
   }
-  dd {
-    margin-top: 2px;
+  dt::after {
+    content: ':';
   }
   @media (min-width: 900px) {
-    .grid {
-      grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
-      gap: 64px;
+    .about {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+      gap: clamp(48px, 8vw, 140px);
+    }
+    .notes {
+      margin-top: calc(var(--step-head) + 30px);
     }
   }
 </style>

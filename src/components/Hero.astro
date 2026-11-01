@@ -1,101 +1,233 @@
 ---
+import { Image } from 'astro:assets';
 import { site, hero } from '../data/site';
+import { projects } from '../data/projects';
+import { media } from '../data/media';
 import Icon from './Icon.astro';
-import MetricCounter from './MetricCounter.astro';
+
+const slides = projects.map((p) => ({ slug: p.slug, name: p.name, ...media[p.slug].cover }));
 ---
 
-<section class="hero" aria-labelledby="hero-title">
-  <div class="wrap">
-    <p class="label eyebrow">{hero.eyebrow}</p>
-    <h1 id="hero-title">{site.name}</h1>
-    <p class="role">{site.role}</p>
-    <span class="thread thread-short" aria-hidden="true"></span>
-    <p class="tagline">{hero.tagline}</p>
-    <p class="subline">{hero.subline}</p>
+<section class="hero frame" aria-labelledby="hero-title">
+  <div class="card">
+    <div class="intro">
+      <h1 id="hero-title">
+        {
+          hero.title.map((line, i) => (
+            <span class="rise">
+              <span style={`--i:${i}`}>{line}</span>
+            </span>
+          ))
+        }
+      </h1>
+      <p class="lead fade-in" style="--i:1">{hero.tagline}</p>
+      <p class="sub fade-in" style="--i:2">{hero.subline}</p>
 
-    <div class="actions">
-      <a class="btn btn-primary" href="#work">View my work <Icon name="arrow" size={18} /></a>
-      <a class="btn" href={site.resume} target="_blank" rel="noopener noreferrer">
-        Resume <Icon name="download" size={18} />
-      </a>
-      <ul class="icon-links">
-        <li>
-          <a class="icon-link" href={site.github} target="_blank" rel="noopener noreferrer" aria-label="GitHub">
-            <Icon name="github" />
-          </a>
-        </li>
-        <li>
-          <a class="icon-link" href={site.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn">
-            <Icon name="linkedin" />
-          </a>
-        </li>
-        <li>
-          <a class="icon-link" href={`mailto:${site.email}`} aria-label="Email">
-            <Icon name="mail" />
-          </a>
-        </li>
-      </ul>
+      <div class="actions fade-in" style="--i:3">
+        <a class="btn btn-accent" href="#work">{hero.action} <Icon name="arrow" size={18} /></a>
+        <ul class="links">
+          <li><a class="link" href={site.resume} target="_blank" rel="noopener noreferrer">Resume</a></li>
+          <li><a class="link" href={site.github} target="_blank" rel="noopener noreferrer">GitHub</a></li>
+          <li><a class="link" href={site.linkedin} target="_blank" rel="noopener noreferrer">LinkedIn</a></li>
+          <li><a class="link" href={`mailto:${site.email}`}>Email</a></li>
+        </ul>
+      </div>
     </div>
 
     <ul class="metrics" aria-label="Headline metrics">
-      {hero.metrics.map((m) => <MetricCounter {...m} />)}
+      {
+        hero.metrics.map((m, i) => (
+          <li class="fade-in" style={`--i:${4 + i}`}>
+            <span class="value num" data-count={m.value}>
+              {m.value}
+            </span>
+            <span class="label">
+              {m.label} ({m.project})
+            </span>
+          </li>
+        ))
+      }
     </ul>
+  </div>
+
+  <div class="stage" data-stage aria-label="The three projects">
+    {
+      slides.map((s, i) => (
+        <figure class:list={['slide', { on: i === 0 }]} data-slide style={s.bg ? `background:${s.bg}` : undefined}>
+          <Image
+            src={s.src}
+            alt={s.alt}
+            widths={[640, 960, 1280]}
+            sizes="(min-width: 1024px) 50vw, 100vw"
+            loading={i === 0 ? 'eager' : 'lazy'}
+            fetchpriority={i === 0 ? 'high' : 'auto'}
+            style={s.fit === 'contain' ? 'object-fit:contain' : s.focus ? `object-position:${s.focus}` : undefined}
+          />
+          <figcaption class="small">{s.caption}</figcaption>
+        </figure>
+      ))
+    }
   </div>
 </section>
 
 <style>
   .hero {
-    padding-block: 56px 24px;
+    display: grid;
+    gap: 12px;
+    padding-bottom: 12px;
   }
-  .eyebrow {
-    margin-bottom: 16px;
+  .card {
+    display: grid;
+    align-content: space-between;
+    gap: 48px;
+    padding: clamp(28px, 4vw, 64px);
+    background: var(--surface);
+    border-radius: var(--radius);
+  }
+  .intro {
+    display: grid;
+    gap: 24px;
   }
   h1 {
-    font-size: clamp(3rem, 9vw, 6rem);
+    /* each line must fit the card: two lines at every width */
+    font-size: clamp(2.25rem, 8.6vw, 5.25rem);
     letter-spacing: -0.035em;
-    line-height: 0.98;
+    line-height: 0.95;
   }
-  .role {
-    margin: 12px 0 20px;
-    font-family: var(--font-mono);
-    font-size: 1.0625rem;
-    letter-spacing: 0.04em;
-    color: var(--muted);
-  }
-  .tagline {
-    margin-top: 28px;
-    font-family: var(--font-head);
-    font-size: clamp(1.5rem, 3.2vw, 2.25rem);
-    line-height: 1.2;
-    letter-spacing: -0.015em;
-    max-width: 24ch;
-  }
-  .subline {
-    margin-top: 16px;
-    color: var(--muted);
-    max-width: 62ch;
+  .sub {
+    max-width: 52ch;
   }
   .actions {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 12px;
-    margin-top: 28px;
+    gap: 16px 28px;
+    margin-top: 8px;
   }
-  .icon-links {
-    margin-left: 4px;
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 22px;
   }
   .metrics {
     display: grid;
-    gap: 16px;
-    margin-top: 48px;
+    gap: 32px;
   }
-  @media (min-width: 768px) {
-    .hero {
-      padding-block: 72px 32px;
+  .metrics li {
+    display: grid;
+    gap: 6px;
+    align-content: start;
+  }
+  .value {
+    font-size: var(--step-head);
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .label {
+    font-size: var(--step-small);
+    line-height: 1.4;
+  }
+
+  .stage {
+    position: relative;
+    display: grid;
+    min-height: 48svh;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--field);
+  }
+  .slide {
+    grid-area: 1 / 1;
+    position: relative;
+    opacity: 0;
+    transition: opacity 1600ms ease;
+  }
+  .slide.on {
+    opacity: 1;
+  }
+  .slide :global(img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scale(1.06);
+    transition: transform 7000ms var(--ease-soft);
+  }
+  .slide.on :global(img) {
+    transform: scale(1);
+  }
+  figcaption {
+    position: absolute;
+    left: 16px;
+    bottom: 16px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: var(--scrim);
+    color: #f4f4f0;
+  }
+  :global(html:not(.js)) .slide {
+    opacity: 1;
+  }
+  :global(html:not(.js)) .slide + .slide {
+    display: none;
+  }
+
+  /* phone: the picture first, the card overlapping its foot */
+  @media (max-width: 1023px) {
+    .stage {
+      order: -1;
     }
+    .card {
+      position: relative;
+      margin-top: -36px;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .slide:not(.on) {
+      display: none;
+    }
+  }
+  @media (min-width: 640px) {
     .metrics {
       grid-template-columns: repeat(3, 1fr);
     }
   }
+  @media (min-width: 1024px) {
+    .hero {
+      grid-template-columns: 1fr 1fr;
+      min-height: calc(100svh - var(--header-h));
+    }
+    h1 {
+      font-size: clamp(2.5rem, 4.6vw, 6rem);
+    }
+    .stage {
+      position: sticky;
+      top: calc(var(--header-h) + 0px);
+      height: calc(100svh - var(--header-h) - 12px);
+    }
+  }
 </style>
+
+<script>
+  // Signature: the stage slowly crossfades between the three projects' own pictures.
+  const stage = document.querySelector<HTMLElement>('[data-stage]');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (stage && !reduce) {
+    const slides = [...stage.querySelectorAll<HTMLElement>('[data-slide]')];
+    let i = 0;
+    let timer: number | undefined;
+    const next = () => {
+      slides[i].classList.remove('on');
+      i = (i + 1) % slides.length;
+      slides[i].classList.add('on');
+    };
+    const start = () => {
+      clearInterval(timer);
+      timer = window.setInterval(next, 6000);
+    };
+    document.addEventListener('visibilitychange', () => (document.hidden ? clearInterval(timer) : start()));
+    start();
+  }
+</script>

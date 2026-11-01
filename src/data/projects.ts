@@ -18,6 +18,14 @@ export interface Project {
   results: { measure: string; result: string }[];
   decisions: string[];
   stack: string[];
+  /** Two or three disciplines for the work index. */
+  disciplines: string[];
+  /** Real result pairs: this project's number against the one it was measured against. */
+  compare: {
+    label: string;
+    mine: { name: string; value: number; text: string };
+    base: { name: string; value: number; text: string };
+  }[];
   /** Diagram boxes, in reading order. `side` boxes render on a branch/loop. */
   diagram: { main: string[]; side: string[]; sideLabel: string };
 }
@@ -79,6 +87,24 @@ export const projects: Project[] = [
       'The benchmark is built from the graph, so every score can be reproduced.',
     ],
     stack: ['Python', 'Qwen3-1.7B', 'QLoRA', 'LangGraph', 'Model Context Protocol (MCP)', 'Neo4j', 'Cypher'],
+    disciplines: ['GraphRAG', 'QLoRA', 'MCP'],
+    compare: [
+      {
+        label: 'Retrieval accuracy',
+        mine: { name: 'Text2Cypher on the graph', value: 79.8, text: '79.8%' },
+        base: { name: 'Vector-only RAG', value: 13.8, text: '13.8%' },
+      },
+      {
+        label: 'Entity F1',
+        mine: { name: 'Fine-tuned Qwen3-1.7B', value: 0.61, text: '0.61' },
+        base: { name: 'Zero-shot gpt-oss-120b, about 70x larger', value: 0.32, text: '0.32' },
+      },
+      {
+        label: 'Technique F1',
+        mine: { name: 'Fine-tuned Qwen3-1.7B', value: 0.6, text: '0.60' },
+        base: { name: 'Zero-shot gpt-oss-120b', value: 0.45, text: '0.45' },
+      },
+    ],
     diagram: {
       main: [
         'Threat report',
@@ -156,6 +182,19 @@ export const projects: Project[] = [
       'Drift has a rule, not a dashboard: a threshold that triggers retraining.',
     ],
     stack: ['Python', 'PyTorch', 'XGBoost', 'SHAP', 'MLflow', 'LangGraph', 'FastAPI', 'Docker', 'Streamlit'],
+    disciplines: ['Graph ML', 'XGBoost', 'MLOps'],
+    compare: [
+      {
+        label: 'Recall at 1% false-positive rate',
+        mine: { name: 'Blend with the graph model', value: 72, text: '72%' },
+        base: { name: 'Without the graph model', value: 66, text: '66%' },
+      },
+      {
+        label: 'XGBoost PR-AUC',
+        mine: { name: 'With 49 account-history features', value: 6.7, text: '6.7x' },
+        base: { name: 'Without them', value: 1, text: '1x' },
+      },
+    ],
     diagram: {
       main: [
         'Transactions',
@@ -231,6 +270,24 @@ export const projects: Project[] = [
       'two-tower retrieval',
       'LLM query parsing',
       'Streamlit',
+    ],
+    disciplines: ['Search', 'Ranking', 'RecSys'],
+    compare: [
+      {
+        label: 'NDCG@10, 8,956 unseen queries',
+        mine: { name: 'CartRank search', value: 1.28, text: '+28%' },
+        base: { name: 'Baseline', value: 1, text: 'baseline' },
+      },
+      {
+        label: 'Top-10 hit rate',
+        mine: { name: 'Two-tower recommender', value: 1.67, text: '+67%' },
+        base: { name: 'Best baseline of ItemKNN, BPR, popularity', value: 1, text: 'baseline' },
+      },
+      {
+        label: 'Correct query parsing',
+        mine: { name: 'After prompt tuning', value: 92, text: '92%' },
+        base: { name: 'Before', value: 42, text: '42%' },
+      },
     ],
     diagram: {
       main: [

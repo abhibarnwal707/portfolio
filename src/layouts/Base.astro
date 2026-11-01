@@ -24,7 +24,7 @@ const ogImage = new URL('/og.png', Astro.site).href;
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
     <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" content="#F4EFE6" />
+    <meta name="theme-color" content="#E8E8E3" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 
     <meta property="og:type" content="website" />
@@ -57,7 +57,7 @@ const ogImage = new URL('/og.png', Astro.site).href;
         var cs = document.querySelector('meta[name="color-scheme"]');
         if (cs) cs.setAttribute('content', t);
         var tc = document.querySelector('meta[name="theme-color"]');
-        if (tc) tc.setAttribute('content', t === 'dark' ? '#111214' : '#F4EFE6');
+        if (tc) tc.setAttribute('content', t === 'dark' ? '#161513' : '#E8E8E3');
       })();
     </script>
 

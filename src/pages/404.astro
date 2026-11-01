@@ -4,31 +4,24 @@ import Icon from '../components/Icon.astro';
 ---
 
 <Base title="Case not found | Abhishek Kumar" description="This page is not in the case file.">
-  <section class="nf">
-    <div class="wrap">
-      <p class="label">CASE 404</p>
-      <h1>Case not found</h1>
-      <span class="thread thread-short" aria-hidden="true"></span>
-      <p class="text">The string ends here. That page isn't in the file, but the rest of the cases are.</p>
-      <a class="btn btn-primary" href="/">Back to the case file <Icon name="arrow" size={18} /></a>
-    </div>
+  <section class="nf frame">
+    <h1><span class="rise"><span>Case not found</span></span></h1>
+    <p class="lead fade-in" style="--i:1">That page isn't here, but the three cases are.</p>
+    <a class="btn btn-accent fade-in" style="--i:2" href="/#work">Back to the work <Icon name="arrow" size={18} /></a>
   </section>
 </Base>
 
 <style>
   .nf {
-    padding-block: 96px 120px;
-  }
-  .wrap {
     display: grid;
-    gap: 20px;
+    gap: 28px;
     justify-items: start;
+    align-content: center;
+    min-height: calc(70svh - var(--header-h));
+    padding-block: 64px;
   }
   h1 {
-    font-size: clamp(2.5rem, 8vw, 5rem);
-    letter-spacing: -0.03em;
-  }
-  .text {
-    color: var(--muted);
+    font-size: var(--step-display);
+    letter-spacing: -0.035em;
   }
 </style>

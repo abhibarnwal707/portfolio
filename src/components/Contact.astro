@@ -1,61 +1,151 @@
 ---
 import { site, sections } from '../data/site';
 import Icon from './Icon.astro';
+
+const c = sections.contact;
 ---
 
-<section id="contact" class="section" aria-labelledby="contact-title">
-  <div class="wrap reveal">
-    <h2 id="contact-title">{sections.contact.heading}</h2>
-    <p class="text">{sections.contact.text}</p>
+<section id="contact" class="contact section frame" aria-labelledby="contact-title">
+  <div class="col" data-reveal-group>
+    <h2 id="contact-title" data-reveal>{c.heading}</h2>
+    <p class="prompt" data-reveal style="--i:1">
+      <span class="muted">{c.prompt[0]}</span>
+      <span>{c.prompt[1]}</span>
+    </p>
 
-    <div class="mail-row">
-      <a class="mail link" href={`mailto:${site.email}`}>{site.email}</a>
-      <button type="button" class="btn btn-sm copy" data-copy={site.email}>
-        <Icon name="copy" size={16} /><span data-copy-label aria-live="polite">Copy</span>
-      </button>
-    </div>
+    <!-- No backend: the form opens the visitor's email app with their line as the body. -->
+    <form class="field" action={`mailto:${site.email}`} method="get" enctype="text/plain" data-mail data-reveal style="--i:2">
+      <input type="hidden" name="subject" value="Hello from your portfolio" />
+      <label class="sr-only" for="mail-body">Your message</label>
+      <input id="mail-body" name="body" type="text" placeholder={c.placeholder} autocomplete="off" />
+      <button type="submit" aria-label="Open in your email app"><Icon name="arrow" size={20} /></button>
+    </form>
+    <p class="small muted" data-reveal style="--i:3">{c.note}</p>
 
-    <ul class="social">
-      <li>
-        <a class="btn" href={site.github} target="_blank" rel="noopener noreferrer">
-          <Icon name="github" size={18} /> GitHub
-        </a>
-      </li>
-      <li>
-        <a class="btn" href={site.linkedin} target="_blank" rel="noopener noreferrer">
-          <Icon name="linkedin" size={18} /> LinkedIn
-        </a>
-      </li>
-    </ul>
+    <dl class="rows" data-reveal style="--i:4">
+      <div>
+        <dt>Email</dt>
+        <dd>
+          <a class="link" href={`mailto:${site.email}`}>{site.email}</a>
+          <button type="button" class="copy" data-copy={site.email}>
+            <Icon name="copy" size={16} /><span data-copy-label aria-live="polite">Copy</span>
+          </button>
+        </dd>
+      </div>
+      <div>
+        <dt>GitHub</dt>
+        <dd><a class="link" href={site.github} target="_blank" rel="noopener noreferrer">github.com/abhibarnwal707</a></dd>
+      </div>
+      <div>
+        <dt>LinkedIn</dt>
+        <dd><a class="link" href={site.linkedin} target="_blank" rel="noopener noreferrer">linkedin.com/in/abhibarnwal707</a></dd>
+      </div>
+    </dl>
   </div>
 </section>
 
 <style>
-  .text {
-    margin-top: 16px;
+  .contact {
+    padding-top: var(--section-gap);
+  }
+  .col {
+    display: grid;
+    gap: 20px;
+    max-width: 640px;
+    margin-inline: auto;
+  }
+  .prompt {
+    display: grid;
+    margin-top: 8px;
+    font-size: var(--step-lead);
+    font-weight: 500;
+    line-height: 1.3;
+  }
+  .field {
+    position: relative;
+    margin-top: 12px;
+  }
+  .field input {
+    width: 100%;
+    height: 64px;
+    padding: 0 72px 0 22px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--surface);
+    font-size: var(--step-body);
+    outline: none;
+    transition: box-shadow var(--t-hover) ease;
+  }
+  .field input::placeholder {
     color: var(--muted);
   }
-  .mail-row {
+  .field input:focus-visible {
+    box-shadow: inset 0 0 0 2px var(--accent); /* taste-skill-ignore: focus ring */
+  }
+  .field button {
+    position: absolute;
+    right: 8px;
+    top: 10px;
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    cursor: pointer;
+    transition: transform var(--t-hover) var(--ease-out);
+  }
+  .field button:hover {
+    transform: translateX(3px);
+  }
+  .field button:active {
+    transform: scale(0.92);
+  }
+  .rows {
+    display: grid;
+    gap: 14px;
+    margin-top: 56px;
+  }
+  .rows div {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 4px 16px;
+    align-items: baseline;
+  }
+  dt {
+    color: var(--muted);
+  }
+  dd {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 16px;
-    margin-top: 32px;
-  }
-  .mail {
-    font-family: var(--font-head);
-    font-weight: 600;
-    font-size: clamp(1.375rem, 5.2vw, 2.75rem);
-    letter-spacing: -0.02em;
+    gap: 8px 14px;
     overflow-wrap: anywhere;
+  }
+  .copy {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 44px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--surface-2);
+    font-size: var(--step-small);
+    cursor: pointer;
+    transition: transform var(--t-press) var(--ease-out);
+  }
+  .copy:active {
+    transform: scale(0.95);
   }
   :global(html:not(.js)) .copy {
     display: none;
   }
-  .social {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-top: 24px;
+  @media (max-width: 560px) {
+    .rows div {
+      grid-template-columns: 1fr;
+    }
   }
 </style>

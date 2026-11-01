@@ -28,8 +28,9 @@ Drop your PDF at `public/resume.pdf`. The Resume button already points to `/resu
 
 ## Optional slots
 
-- Case-study screenshots: search for `SCREENSHOT SLOT` in `src/pages/projects/[slug].astro`.
+- Project pictures: `src/assets/work/` (stills) and `public/media/` (demo loops), wired up in `src/data/media.ts`.
 - Profile photo: search for `OPTIONAL PHOTO SLOT` in `src/components/About.astro`.
+- Footer photo: `src/assets/place/`; its credit line lives in `src/data/media.ts` (`placeCredit`) and must stay on the page.
 
 ## Deploy to Cloudflare
 

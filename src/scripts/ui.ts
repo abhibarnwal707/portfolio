@@ -1,20 +1,28 @@
-// Small shared behaviors: reveal-on-scroll, hero counters, copy button, mobile menu.
-// Everything is an enhancement: with no JS the page is fully visible and readable.
+// Shared behaviours. Everything is an enhancement: with no JS the page is fully visible and readable.
+import Lenis from 'lenis';
 
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const root = document.documentElement;
+const headerH = () => parseFloat(getComputedStyle(root).getPropertyValue('--header-h')) || 68;
 
-/* ---- reveal on scroll ---- */
+/* ---- smooth scroll (off under reduced motion) ---- */
+let lenis: Lenis | null = null;
+if (!reduceMotion) {
+  lenis = new Lenis({ autoRaf: true, lerp: 0.11, anchors: { offset: -headerH() - 8 } });
+}
+window.addEventListener('smooth-scroll', (e) => {
+  const y = (e as CustomEvent<{ y: number }>).detail.y;
+  if (lenis) lenis.scrollTo(y, { duration: 1.2 });
+  else window.scrollTo({ top: y });
+});
+
+/* ---- entrances: each group's parts arrive in reading order, once ---- */
 if (!reduceMotion && 'IntersectionObserver' in window) {
-  const items = [...document.querySelectorAll<HTMLElement>('.reveal')];
+  const groups = [...document.querySelectorAll<HTMLElement>('[data-reveal-group]')];
   // Anything already on screen is never hidden, so there is no flash on load.
-  const docTop = (el: HTMLElement) => {
-    let y = 0;
-    for (let n: HTMLElement | null = el; n; n = n.offsetParent as HTMLElement | null) y += n.offsetTop;
-    return y;
-  };
-  items.forEach((el) => {
-    if (docTop(el) < scrollY + innerHeight * 0.9) el.classList.add('in');
+  groups.forEach((g) => {
+    const top = g.getBoundingClientRect().top;
+    if (top < innerHeight * 0.92) g.classList.add('in');
   });
   root.classList.add('reveal-ready');
   const io = new IntersectionObserver(
@@ -26,14 +34,13 @@ if (!reduceMotion && 'IntersectionObserver' in window) {
         }
       });
     },
-    { threshold: 0.12 },
+    { rootMargin: '0px 0px -8% 0px' },
   );
-  items.filter((el) => !el.classList.contains('in')).forEach((el) => io.observe(el));
+  groups.filter((g) => !g.classList.contains('in')).forEach((g) => io.observe(g));
 }
 
-/* ---- counters: final value is in the HTML; animate once on view ---- */
+/* ---- counters: the final value is in the HTML; count up once on view ---- */
 if (!reduceMotion && 'IntersectionObserver' in window) {
-  const counters = document.querySelectorAll<HTMLElement>('[data-count]');
   const io = new IntersectionObserver(
     (entries) => {
       entries.forEach((e) => {
@@ -44,7 +51,7 @@ if (!reduceMotion && 'IntersectionObserver' in window) {
     },
     { threshold: 0.6 },
   );
-  counters.forEach((el) => io.observe(el));
+  document.querySelectorAll<HTMLElement>('[data-count]').forEach((el) => io.observe(el));
 }
 
 function animateCounter(el: HTMLElement) {
@@ -55,10 +62,10 @@ function animateCounter(el: HTMLElement) {
   const target = parseFloat(num);
   const decimals = (num.split('.')[1] ?? '').length;
   const start = performance.now();
-  const duration = 900;
+  const duration = 1100;
   const tick = (now: number) => {
     const t = Math.min((now - start) / duration, 1);
-    const eased = 1 - Math.pow(1 - t, 3);
+    const eased = 1 - Math.pow(1 - t, 4);
     el.textContent = prefix + (target * eased).toFixed(decimals) + suffix;
     if (t < 1) requestAnimationFrame(tick);
     else el.textContent = final;
@@ -75,7 +82,6 @@ document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((btn) => {
     try {
       await navigator.clipboard.writeText(text);
     } catch {
-      // Older browsers / insecure context: fall back to a hidden textarea.
       const ta = document.createElement('textarea');
       ta.value = text;
       ta.style.position = 'fixed';
@@ -95,6 +101,31 @@ document.querySelectorAll<HTMLButtonElement>('[data-copy]').forEach((btn) => {
       timer = window.setTimeout(() => (label.textContent = 'Copy'), 2000);
     }
   });
+});
+
+/* ---- the one-field contact: build a clean mailto (the plain form still works without JS) ---- */
+document.querySelectorAll<HTMLFormElement>('[data-mail]').forEach((form) => {
+  form.addEventListener('submit', (e) => {
+    e.preventDefault();
+    const to = form.action.replace(/^mailto:/, '').split('?')[0];
+    const data = new FormData(form);
+    const subject = encodeURIComponent(String(data.get('subject') ?? ''));
+    const body = encodeURIComponent(String(data.get('body') ?? ''));
+    location.href = `mailto:${to}?subject=${subject}&body=${body}`;
+  });
+});
+
+/* ---- live local time in the footer ---- */
+document.querySelectorAll<HTMLElement>('[data-clock]').forEach((el) => {
+  const fmt = new Intl.DateTimeFormat('en-IN', {
+    timeZone: el.dataset.zone,
+    hour: 'numeric',
+    minute: '2-digit',
+    hour12: true,
+  });
+  const render = () => (el.textContent = `${el.dataset.city}, ${fmt.format(new Date()).toLowerCase()}`);
+  render();
+  window.setInterval(render, 30_000);
 });
 
 /* ---- mobile menu: close on link click or Escape ---- */

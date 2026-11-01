@@ -4,32 +4,34 @@ import { sections } from '../data/site';
 import Icon from './Icon.astro';
 ---
 
-<section id="education" class="section" aria-labelledby="edu-title">
-  <div class="wrap">
-    <header class="section-head reveal">
-      <h2 id="edu-title">{sections.education.heading}</h2>
-    </header>
+<section id="education" class="education frame" aria-labelledby="edu-title">
+  <div class="band" data-reveal-group>
+    <h2 id="edu-title" data-reveal>{sections.education.heading}</h2>
 
-    {
-      education.map((e) => (
-        <p class="edu reveal">
-          <strong>{e.credential}</strong>, {e.school} <span class="muted">· {e.years} · {e.grade}</span>
-        </p>
-      ))
-    }
-
-    <ul class="certs">
+    <ul class="list">
       {
-        certifications.map((c) => (
-          <li class="cert reveal">
+        education.map((e) => (
+          <li data-reveal style="--i:1">
+            <span class="title">
+              {e.credential}, {e.school}
+            </span>
+            <span class="meta">
+              {e.years} · {e.grade}
+            </span>
+          </li>
+        ))
+      }
+      {
+        certifications.map((c, i) => (
+          <li data-reveal style={`--i:${i + 2}`}>
             {c.url ? (
-              <a class="title link" href={c.url} target="_blank" rel="noopener noreferrer">
-                {c.title} <Icon name="external" size={14} />
+              <a class="title cert" href={c.url} target="_blank" rel="noopener noreferrer">
+                {c.title} <Icon name="external" size={18} />
               </a>
             ) : (
               <span class="title">{c.title}</span>
             )}
-            {c.issuer && <span class="issuer mono">{c.issuer}</span>}
+            {c.issuer && <span class="meta">{c.issuer}</span>}
           </li>
         ))
       }
@@ -38,34 +40,51 @@ import Icon from './Icon.astro';
 </section>
 
 <style>
-  .edu {
-    max-width: none;
-  }
-  .certs {
+  .band {
     display: grid;
-    gap: 16px;
-    margin-top: 32px;
-  }
-  .cert {
-    display: grid;
-    gap: 4px;
-    padding: 16px 20px;
-    background: var(--surface);
-    border: 1px solid var(--line);
+    gap: 40px;
+    padding: clamp(32px, 5vw, 80px);
+    background: var(--surface-2);
     border-radius: var(--radius);
   }
-  .title {
-    font-weight: 600;
+  .list {
+    display: grid;
+    gap: 28px;
   }
-  .issuer {
-    font-size: 0.75rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
+  li {
+    display: grid;
+    gap: 4px;
+  }
+  .title {
+    font-size: var(--step-lead);
+    font-weight: 500;
+    line-height: 1.25;
+  }
+  .cert {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    width: fit-content;
+  }
+  .cert svg {
+    transition: transform var(--t-hover) var(--ease-out);
+  }
+  .cert:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.18em;
+  }
+  .cert:hover svg {
+    transform: translate(2px, -2px);
+  }
+  .meta {
     color: var(--muted);
   }
-  @media (min-width: 768px) {
-    .certs {
-      grid-template-columns: repeat(3, 1fr);
+  @media (min-width: 900px) {
+    .band {
+      grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+      gap: clamp(48px, 8vw, 140px);
     }
   }
 </style>

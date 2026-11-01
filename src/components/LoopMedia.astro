@@ -1,0 +1,51 @@
+---
+import { getImage } from 'astro:assets';
+import type { Loop } from '../data/media';
+
+interface Props {
+  loop: Loop;
+}
+const { loop } = Astro.props;
+const poster = loop.kind === 'video' ? await getImage({ src: loop.poster, width: loop.width, format: 'webp' }) : null;
+---
+
+{
+  loop.kind === 'video' ? (
+    <video
+      class="loop"
+      data-loop
+      muted
+      loop
+      playsinline
+      preload="none"
+      poster={poster!.src}
+      width={loop.width}
+      height={loop.height}
+      aria-label={loop.alt}
+    >
+      <source src={loop.src} type="video/webm" />
+    </video>
+  ) : (
+    <img class="loop" src={loop.src} width={loop.width} height={loop.height} alt={loop.alt} loading="lazy" decoding="async" />
+  )
+}
+
+<script>
+  // Play only while on screen; under reduced motion the poster frame stays.
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  document.querySelectorAll<HTMLVideoElement>('[data-loop]').forEach((v) => {
+    if (reduce) return;
+    // Recorded clips carry no duration, so restart by hand if `loop` doesn't.
+    v.addEventListener('ended', () => {
+      v.currentTime = 0;
+      void v.play();
+    });
+    new IntersectionObserver(
+      ([e]) => {
+        if (e.isIntersecting) void v.play().catch(() => {});
+        else v.pause();
+      },
+      { threshold: 0.25 },
+    ).observe(v);
+  });
+</script>

@@ -9,40 +9,41 @@ import Icon from './Icon.astro';
 
 <style>
   .theme-toggle {
-    position: relative;
     display: grid;
     place-items: center;
-    width: 40px;
-    height: 40px;
-    border: 1px solid var(--line);
-    border-radius: 12px;
-    background: var(--surface);
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--surface-2);
     color: var(--ink);
     cursor: pointer;
-    transition: background-color 180ms ease-out;
+    transition: transform var(--t-hover) var(--ease-out);
   }
   .theme-toggle:hover {
-    background: var(--surface-2);
+    transform: rotate(-12deg);
+  }
+  .theme-toggle:active {
+    transform: scale(0.92);
   }
   .icon {
     grid-area: 1 / 1;
     display: grid;
-    transition: transform 250ms ease-out, opacity 250ms ease-out;
+    transition: transform 400ms var(--ease-out), opacity 300ms ease;
   }
   /* light theme shows the moon (click to go dark), dark theme shows the sun */
   .icon-sun {
     opacity: 0;
-    transform: rotate(-90deg) scale(0.6);
+    transform: rotate(-90deg) scale(0.5);
   }
   :global(:root[data-theme='dark']) .icon-moon {
     opacity: 0;
-    transform: rotate(90deg) scale(0.6);
+    transform: rotate(90deg) scale(0.5);
   }
   :global(:root[data-theme='dark']) .icon-sun {
     opacity: 1;
     transform: none;
   }
-  /* without JS the button can't do anything */
   :global(html:not(.js)) .theme-toggle {
     display: none;
   }
@@ -51,7 +52,7 @@ import Icon from './Icon.astro';
 <script>
   const btn = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
   const root = document.documentElement;
-  const COLORS = { light: '#F4EFE6', dark: '#111214' } as const;
+  const COLORS = { light: '#E8E8E3', dark: '#161513' } as const;
   type Theme = keyof typeof COLORS;
 
   const stored = (): Theme | null => {
@@ -76,12 +77,25 @@ import Icon from './Icon.astro';
 
   btn?.addEventListener('click', () => {
     const next: Theme = current() === 'dark' ? 'light' : 'dark';
-    apply(next);
     try {
       localStorage.setItem('theme', next);
     } catch {
       /* storage unavailable: the choice just won't persist */
     }
+    const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!document.startViewTransition || reduce) {
+      apply(next);
+      return;
+    }
+    // The new theme wipes out in a circle from the button.
+    const r = btn.getBoundingClientRect();
+    const x = r.left + r.width / 2;
+    const y = r.top + r.height / 2;
+    const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+    root.style.setProperty('--wipe-x', `${x}px`);
+    root.style.setProperty('--wipe-y', `${y}px`);
+    root.style.setProperty('--wipe-r', `${radius}px`);
+    document.startViewTransition(() => apply(next));
   });
 
   // Follow the system live until the visitor picks a theme.

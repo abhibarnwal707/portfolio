@@ -1,0 +1,345 @@
+---
+import { Image } from 'astro:assets';
+import { projects } from '../data/projects';
+import { media } from '../data/media';
+import { sections } from '../data/site';
+import Icon from './Icon.astro';
+import Compare from './Compare.astro';
+import LoopMedia from './LoopMedia.astro';
+---
+
+<section id="work" class="work" aria-labelledby="work-title">
+  <header class="head frame" data-reveal-group>
+    <h2 id="work-title" data-reveal>{sections.work.heading}</h2>
+    <p class="sub" data-reveal style="--i:1">{sections.work.sub}</p>
+  </header>
+
+  <div class="track" data-work style={`--count:${projects.length}`}>
+    <div class="stage">
+      <ol class="index frame" aria-label="Cases">
+        {
+          projects.map((p, i) => (
+            <li class:list={{ current: i === 0 }} data-index={i}>
+              <a href={`/projects/${p.slug}/`}>
+                <span class="name">{p.name}</span>
+                <span class="disc">{p.disciplines.join(' · ')}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ol>
+
+      {
+        projects.map((p, i) => {
+          const m = media[p.slug];
+          const fit = m.cover.fit === 'contain' ? `object-fit:contain;background:${m.cover.bg}` : '';
+          return (
+            <article class:list={['case', { active: i === 0 }]} data-case={i} aria-labelledby={`case-${p.slug}`} data-reveal-group>
+              <figure class="pic" data-reveal style={m.cover.bg ? `background:${m.cover.bg}` : undefined}>
+                {m.loop ? (
+                  <LoopMedia loop={m.loop} />
+                ) : (
+                  <Image
+                    src={m.cover.src}
+                    alt={m.cover.alt}
+                    widths={[640, 960, 1280, 1600]}
+                    sizes="(min-width: 1024px) 62vw, 100vw"
+                    loading="lazy"
+                    style={fit || (m.cover.focus ? `object-position:${m.cover.focus}` : undefined)}
+                  />
+                )}
+                <figcaption class="small">{m.loop ? m.loop.caption : m.cover.caption}</figcaption>
+              </figure>
+              <div class="text frame">
+                <h3 id={`case-${p.slug}`} data-reveal style="--i:1">
+                  <a href={`/projects/${p.slug}/`}>{p.name}</a>
+                </h3>
+                <p class="oneliner" data-reveal style="--i:2">
+                  {p.oneLiner}
+                </p>
+                <div data-reveal style="--i:3">
+                  <Compare project={p} label={sections.work.compareLabel} />
+                </div>
+                <ul class="links" data-reveal style="--i:4">
+                  <li>
+                    <a class="btn btn-quiet" href={`/projects/${p.slug}/`}>
+                      Read the case <Icon name="arrow" size={18} />
+                    </a>
+                  </li>
+                  {p.links.map((l) => (
+                    <li>
+                      <a class="link" href={l.href} target="_blank" rel="noopener noreferrer">
+                        {l.label}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </article>
+          );
+        })
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .work {
+    padding-top: calc(var(--section-gap) / 2);
+  }
+  .head {
+    display: grid;
+    gap: 16px 48px;
+    margin-bottom: 56px;
+  }
+  h2 {
+    font-size: var(--step-display);
+    letter-spacing: -0.035em;
+    line-height: 0.95;
+  }
+  .sub {
+    max-width: 44ch;
+  }
+  @media (min-width: 900px) {
+    .head {
+      grid-template-columns: 1fr auto;
+      align-items: end;
+    }
+  }
+  .index {
+    display: none;
+  }
+
+  /* ---- stacked: phone, tablet, and no script ---- */
+  .case {
+    display: grid;
+    gap: 28px;
+    margin-bottom: 96px;
+  }
+  .pic {
+    position: relative;
+    margin-inline: var(--m);
+    aspect-ratio: 16 / 10;
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: var(--field);
+  }
+  .pic :global(img),
+  .pic :global(video) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  figcaption {
+    position: absolute;
+    left: 16px;
+    top: 16px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: var(--scrim);
+    color: #f4f4f0;
+  }
+  .text {
+    display: grid;
+    gap: 22px;
+    align-content: start;
+  }
+  h3 {
+    font-size: var(--step-head);
+  }
+  h3 a {
+    text-decoration: none;
+  }
+  h3 a:hover {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.12em;
+  }
+  .oneliner {
+    max-width: 46ch;
+  }
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px 24px;
+  }
+  @media (min-width: 768px) and (max-width: 1023px) {
+    .case {
+      grid-template-columns: 1fr 1fr;
+      align-items: start;
+    }
+    .pic {
+      margin-right: 0;
+      aspect-ratio: 4 / 5;
+    }
+    .text {
+      padding-left: 0;
+    }
+  }
+
+  /* ---- pinned stage: wide screens with script; one screen of scroll per case ---- */
+  @media (min-width: 1024px) {
+    :global(html.js) .track {
+      height: calc(var(--count) * 100svh);
+    }
+    :global(html.js) .stage {
+      position: sticky;
+      top: var(--header-h);
+      height: calc(100svh - var(--header-h));
+      display: grid;
+      grid-template-columns: 38fr 62fr;
+      grid-template-rows: auto 1fr;
+      grid-template-areas:
+        'index pic'
+        'panel pic';
+      overflow: hidden;
+    }
+    :global(html.js) .case {
+      display: contents;
+    }
+    :global(html.js) .pic {
+      grid-area: pic;
+      margin: 0;
+      aspect-ratio: auto;
+      border-radius: 0;
+      clip-path: inset(100% 0 0 0);
+      transition: clip-path var(--t-open) var(--ease-in-out);
+    }
+    :global(html.js) .case.active .pic,
+    :global(html.js) .case.past .pic {
+      clip-path: inset(0 0 0 0);
+    }
+    :global(html.js) .text {
+      grid-area: panel;
+      display: none;
+      align-content: center;
+      gap: 20px;
+      padding-right: 48px;
+      opacity: 0;
+      transform: translateY(20px);
+      transition:
+        opacity 500ms var(--ease-out),
+        transform 700ms var(--ease-expo),
+        display 500ms allow-discrete;
+    }
+    :global(html.js) .case.active .text {
+      display: grid;
+      opacity: 1;
+      transform: none;
+    }
+    @starting-style {
+      :global(html.js) .case.active .text {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+    }
+    /* the index row already names the current case */
+    :global(html.js) .text h3 {
+      position: absolute;
+      width: 1px;
+      height: 1px; /* taste-skill-ignore: visually hidden heading, not a rule */
+      overflow: hidden;
+      clip-path: inset(50%);
+    }
+    :global(html.js) .index {
+      grid-area: index;
+      display: grid;
+      padding-block: 24px 8px;
+      padding-right: 48px;
+    }
+    .index a {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 16px;
+      min-height: 52px;
+      padding-block: 8px;
+      text-decoration: none;
+      color: var(--muted);
+      transition: color var(--t-hover) ease;
+    }
+    .name {
+      font-size: var(--step-lead);
+      font-weight: 500;
+      transition: transform 320ms var(--ease-out);
+    }
+    .disc {
+      font-size: var(--step-small);
+    }
+    .index a:hover .name {
+      transform: translateX(8px);
+    }
+    .index .current a,
+    .index a:hover {
+      color: var(--ink);
+    }
+    .index .current .name {
+      font-weight: 600;
+    }
+    .index .current .name::before {
+      content: '';
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      margin-right: 12px;
+      border-radius: 50%;
+      background: var(--accent);
+      vertical-align: 0.12em;
+    }
+  }
+</style>
+
+<script>
+  // Pinned stage: each case holds one screen of scroll; its picture wipes in from the bottom edge.
+  const work = document.querySelector<HTMLElement>('[data-work]');
+  const wide = matchMedia('(min-width: 1024px)');
+
+  if (work) {
+    const cases = [...work.querySelectorAll<HTMLElement>('[data-case]')];
+    const rows = [...work.querySelectorAll<HTMLElement>('[data-index]')];
+    let active = 0;
+    // On the pinned stage the cases are display: contents, which an IntersectionObserver can't see.
+    if (wide.matches) cases.forEach((c) => c.classList.add('in'));
+
+    const setActive = (n: number) => {
+      if (n === active) return;
+      active = n;
+      cases.forEach((c, i) => {
+        c.classList.toggle('active', i === n);
+        c.classList.toggle('past', i < n);
+      });
+      rows.forEach((r, i) => r.classList.toggle('current', i === n));
+      cases[n].dispatchEvent(new CustomEvent('case:show'));
+    };
+
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        ticking = false;
+        if (!wide.matches) return;
+        const top = work.getBoundingClientRect().top;
+        const step = work.offsetHeight / cases.length;
+        const n = Math.min(cases.length - 1, Math.max(0, Math.floor((-top + step * 0.35) / step)));
+        setActive(n);
+      });
+    };
+    addEventListener('scroll', onScroll, { passive: true });
+    addEventListener('resize', onScroll);
+    onScroll();
+
+    // Index rows jump to their step instead of leaving the page on wide screens.
+    rows.forEach((r, i) => {
+      r.querySelector('a')?.addEventListener('click', (e) => {
+        if (!wide.matches) return;
+        e.preventDefault();
+        const step = work.offsetHeight / cases.length;
+        const y = work.getBoundingClientRect().top + scrollY + step * i + 2;
+        window.dispatchEvent(new CustomEvent('smooth-scroll', { detail: { y } }));
+      });
+    });
+  }
+
+</script>
