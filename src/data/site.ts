@@ -22,12 +22,13 @@ export const nav = [
 ] as const;
 
 export const hero = {
+  label: 'AI / ML Engineer',
   // The h1, one entry per line.
-  title: ['Abhishek Kumar,', 'AI/ML engineer'],
+  title: ['Abhishek', 'Kumar'],
   tagline: 'I build AI systems that are measured, explained and shipped.',
   subline:
     'Agentic GraphRAG, fine-tuned LLMs, fraud detection and search ranking, each with a benchmark, a guardrail written in code, and something you can click.',
-  action: 'See the three cases',
+  action: 'View my work',
   metrics: [
     {
       value: '79.8%',
@@ -65,9 +66,13 @@ export const sections = {
     sub: 'Three projects, built end to end. Each one has a benchmark, an honest comparison, and a way to try it.',
     compareLabel: 'Against the baseline',
   },
+  baselines: {
+    heading: 'Proven against a baseline',
+    sub: 'Pick a project. Each row is a real measurement next to the number it beat.',
+  },
   skills: {
-    heading: 'Skills, and where they went',
-    sub: 'Every tool I use, beside the projects it was used in.',
+    heading: 'Toolkit',
+    sub: 'The tools I use, and the projects each one went into.',
   },
   about: { heading: 'About' },
   education: { heading: 'Education & certifications' },

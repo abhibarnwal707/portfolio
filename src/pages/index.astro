@@ -1,11 +1,10 @@
 ---
 import Base from '../layouts/Base.astro';
 import Hero from '../components/Hero.astro';
-import Figures from '../components/Figures.astro';
 import Work from '../components/Work.astro';
+import Baselines from '../components/Baselines.astro';
 import Skills from '../components/Skills.astro';
 import About from '../components/About.astro';
-import Education from '../components/Education.astro';
 import Contact from '../components/Contact.astro';
 import { site } from '../data/site';
 
@@ -24,10 +23,9 @@ const jsonLd = {
 
 <Base jsonLd={jsonLd}>
   <Hero />
-  <Figures />
   <Work />
+  <Baselines />
   <Skills />
   <About />
-  <Education />
   <Contact />
 </Base>

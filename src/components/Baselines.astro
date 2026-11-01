@@ -1,0 +1,64 @@
+---
+import { projects } from '../data/projects';
+import { sections } from '../data/site';
+import BaselineRows from './BaselineRows.astro';
+---
+
+<section id="baselines" class="baselines section" aria-labelledby="base-title">
+  <div class="wrap">
+    <header class="section-head" data-reveal-group>
+      <p class="label" data-reveal>The evidence</p>
+      <h2 id="base-title" data-reveal style="--i:1">{sections.baselines.heading}</h2>
+      <p data-reveal style="--i:2">{sections.baselines.sub}</p>
+    </header>
+
+    <div class="tabbed" data-tabs>
+      <div class="tabs-row">
+        <div class="tabs" role="tablist" aria-label="Projects">
+          <span class="tabs-pill" aria-hidden="true"></span>
+          {
+            projects.map((p, i) => (
+              <button type="button" class="tab" role="tab" id={`bt-${p.slug}`} aria-controls={`bp-${p.slug}`} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1}>
+                {p.name}
+              </button>
+            ))
+          }
+        </div>
+      </div>
+
+      {
+        projects.map((p) => (
+          <div class="panel" role="tabpanel" id={`bp-${p.slug}`} aria-labelledby={`bt-${p.slug}`}>
+            <h3 class="panel-title">{p.name}</h3>
+            <BaselineRows project={p} />
+          </div>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .tabs-row {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 40px;
+  }
+  .panel-title {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  :global(html:not(.js)) .panel-title {
+    position: static;
+    width: auto;
+    height: auto;
+    clip-path: none;
+    margin: 32px 0 8px;
+  }
+  .panel[hidden] {
+    display: none;
+  }
+</style>

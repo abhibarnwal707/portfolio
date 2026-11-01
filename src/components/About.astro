@@ -1,78 +1,157 @@
 ---
 import { about, sections, site } from '../data/site';
+import { education, certifications } from '../data/education';
+import Icon from './Icon.astro';
 ---
 
-<section id="about" class="about section frame" aria-labelledby="about-title">
-  <!-- OPTIONAL PHOTO SLOT: a round portrait (44px) above the letter, only if the owner supplies one. -->
-  <div class="letter" data-reveal-group>
-    <h2 id="about-title" data-reveal>{sections.about.heading}</h2>
-    {about.paragraphs.map((p, i) => <p data-reveal style={`--i:${i + 1}`}>{p}</p>)}
-    <p class="sign" data-reveal style="--i:4">
-      <span class="name">{site.name}</span>
-      <span class="small muted">{site.role}, {site.location}</span>
-    </p>
+<section id="about" class="about section" aria-labelledby="about-title">
+  <div class="wrap grid">
+    <div class="text" data-reveal-group>
+      <p class="label" data-reveal>Who I am</p>
+      <h2 id="about-title" data-reveal style="--i:1">{sections.about.heading}</h2>
+      {about.paragraphs.map((p, i) => <p data-reveal style={`--i:${i + 2}`}>{p}</p>)}
+      <p class="sign" data-reveal style="--i:5">— {site.name}, {site.location}</p>
+    </div>
+
+    <!-- OPTIONAL PHOTO SLOT: a profile photo can sit above the notes card, only if the owner supplies one. -->
+    <aside class="frame-card notes" aria-label="Case notes" data-reveal-group>
+      <span class="notch">Case notes</span>
+      <dl>
+        {
+          about.notes.map((n, i) => (
+            <div data-reveal style={`--i:${i}`}>
+              <dt>{n.key}</dt>
+              <dd>{n.value}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </aside>
   </div>
 
-  <dl class="notes" data-reveal-group aria-label="Case notes">
-    {
-      about.notes.map((n, i) => (
-        <div data-reveal style={`--i:${i}`}>
-          <dt>{n.key}</dt>
-          <dd>{n.value}</dd>
-        </div>
-      ))
-    }
-  </dl>
+  <div id="education" class="wrap edu" aria-labelledby="edu-title" role="region">
+    <header class="edu-head" data-reveal-group>
+      <h2 id="edu-title" data-reveal>{sections.education.heading}</h2>
+    </header>
+    <ul class="edu-cards" data-reveal-group>
+      {
+        education.map((e) => (
+          <li data-reveal>
+            <article class="frame-card ed">
+              <span class="notch">{e.years}</span>
+              <span class="badge-ring" aria-hidden="true">
+                <Icon name="target" size={24} />
+              </span>
+              <h3>{e.credential}</h3>
+              <p>{e.school}</p>
+              <p class="muted">{e.grade}</p>
+            </article>
+          </li>
+        ))
+      }
+      {
+        certifications.map((c, i) => (
+          <li data-reveal style={`--i:${i + 1}`}>
+            <article class="frame-card ed">
+              {c.issuer && <span class="notch">{c.issuer}</span>}
+              <span class="badge-ring" aria-hidden="true">
+                <Icon name="target" size={24} />
+              </span>
+              <h3>{c.title}</h3>
+              {c.url && (
+                <a class="link verify" href={c.url} target="_blank" rel="noopener noreferrer">
+                  Verify credential <Icon name="external" size={16} />
+                </a>
+              )}
+            </article>
+          </li>
+        ))
+      }
+    </ul>
+  </div>
 </section>
 
 <style>
-  .about {
+  .grid {
     display: grid;
-    gap: 64px;
-    align-items: start;
+    gap: 56px;
+    align-items: center;
   }
-  .letter {
+  .text {
     display: grid;
-    gap: 22px;
-    max-width: 600px;
+    gap: 18px;
   }
-  .letter h2 {
+  .text h2 {
     margin-bottom: 8px;
   }
   .sign {
+    font-weight: 700;
+    color: var(--yellow);
+  }
+  .notes dl {
     display: grid;
-    gap: 4px;
-    margin-top: 12px;
+    gap: 0;
   }
-  .name {
-    font-style: italic;
-    font-size: var(--step-lead);
-  }
-  .notes {
+  .notes dl div {
     display: grid;
-    gap: 14px;
-    padding: 28px 32px;
-    background: var(--surface);
-    border-radius: var(--radius);
+    gap: 2px;
+    padding: 16px 0;
+    border-bottom: 2px solid var(--line);
   }
-  .notes div {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px 12px;
+  .notes dl div:last-child {
+    border-bottom: 0;
   }
   dt {
-    color: var(--muted);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--yellow);
   }
-  dt::after {
-    content: ':';
+  dd {
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+  .edu {
+    margin-top: clamp(72px, 9vw, 120px);
+  }
+  .edu-head {
+    margin-bottom: 44px;
+    text-align: center;
+  }
+  .edu-cards {
+    display: grid;
+    gap: 36px 24px;
+  }
+  .edu-cards > li {
+    display: grid;
+  }
+  .ed {
+    justify-items: start;
+    gap: 12px;
+    padding-top: 40px;
+  }
+  .ed:hover {
+    transform: translateY(-6px);
+  }
+  .verify {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 700;
   }
   @media (min-width: 900px) {
-    .about {
-      grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
-      gap: clamp(48px, 8vw, 140px);
+    .grid {
+      grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.9fr);
+      gap: clamp(48px, 7vw, 110px);
     }
-    .notes {
-      margin-top: calc(var(--step-head) + 30px);
+    .edu-cards {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (min-width: 1180px) {
+    .edu-cards {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
     }
   }
 </style>

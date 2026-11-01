@@ -1,0 +1,158 @@
+---
+import type { Project } from '../data/projects';
+import Icon from './Icon.astro';
+
+interface Props {
+  project: Project;
+}
+const { project } = Astro.props;
+---
+
+<ul class="rows">
+  {project.compare.map((c, i) => (
+    <li class:list={['row', { first: i === 0 }]}>
+      <span class="r-icon" aria-hidden="true">
+        <Icon name={project.slug} size={30} />
+      </span>
+      <span class="r-measure">{c.label}</span>
+      <span class="r-cell">
+        <Icon name="pin" size={22} />
+        <span>
+          <strong class="num">{c.mine.text}</strong>
+          <small>{c.mine.name}</small>
+        </span>
+      </span>
+      <span class="r-cell base">
+        <Icon name="tag" size={22} />
+        <span>
+          <strong class="num">{c.base.text}</strong>
+          <small>{c.base.name}</small>
+        </span>
+      </span>
+      <a class="r-go" href={`/projects/${project.slug}/#results`} aria-label={`${project.name} results`}>
+        <Icon name="chevron" size={22} />
+      </a>
+    </li>
+  ))}
+</ul>
+
+<style>
+  .rows {
+    border-top: 2px solid var(--line);
+  }
+  .row {
+    position: relative;
+    display: grid;
+    grid-template-columns: 56px minmax(0, 1.4fr) minmax(0, 1fr) minmax(0, 1fr) 64px;
+    align-items: center;
+    gap: 20px;
+    min-height: 112px;
+    padding: 18px 0 18px 20px;
+    border-bottom: 2px solid var(--line);
+    border-radius: 0;
+    transition: background-color 280ms var(--ease-out), color 280ms ease, border-radius 280ms ease, transform 280ms var(--ease-out);
+  }
+  .r-icon {
+    color: var(--yellow);
+  }
+  .r-measure {
+    font-size: clamp(1.25rem, 1rem + 0.9vw, 1.8rem);
+    font-weight: 700;
+    line-height: 1.15;
+  }
+  .r-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--yellow);
+  }
+  .r-cell > span {
+    display: grid;
+    color: var(--ink);
+  }
+  .r-cell strong {
+    font-size: 1.5rem;
+    line-height: 1.1;
+  }
+  .r-cell small {
+    font-size: 0.85rem;
+    line-height: 1.35;
+    color: var(--muted);
+  }
+  .r-go {
+    display: grid;
+    place-items: center;
+    align-self: stretch;
+    margin: -18px 0;
+    color: var(--ink);
+    transition: background-color 280ms ease, color 280ms ease;
+  }
+  /* the hovered (or first) row becomes a white card with a yellow arrow cell */
+  .row:hover,
+  .row:focus-within,
+  .rows:not(:hover):not(:focus-within) .row.first {
+    background: var(--cream);
+    color: var(--cream-ink);
+    border-radius: 12px;
+    border-bottom-color: transparent;
+    transform: scale(1.02);
+    z-index: 1;
+  }
+  .row:hover .r-icon,
+  .row:focus-within .r-icon,
+  .rows:not(:hover):not(:focus-within) .row.first .r-icon,
+  .row:hover .r-cell,
+  .row:focus-within .r-cell,
+  .rows:not(:hover):not(:focus-within) .row.first .r-cell {
+    color: var(--cream-ink);
+  }
+  .row:hover .r-cell > span,
+  .row:focus-within .r-cell > span,
+  .rows:not(:hover):not(:focus-within) .row.first .r-cell > span {
+    color: var(--cream-ink);
+  }
+  .row:hover small,
+  .row:focus-within small,
+  .rows:not(:hover):not(:focus-within) .row.first small {
+    color: var(--cream-muted);
+  }
+  .row:hover .r-go,
+  .row:focus-within .r-go,
+  .rows:not(:hover):not(:focus-within) .row.first .r-go {
+    background: var(--yellow);
+    color: var(--yellow-ink);
+    border-radius: 0 12px 12px 0;
+  }
+  @media (max-width: 860px) {
+    .row {
+      grid-template-columns: 44px 1fr 52px;
+      grid-template-areas:
+        'icon measure go'
+        'icon mine go'
+        'icon base go';
+      gap: 10px 14px;
+      padding-left: 14px;
+    }
+    .r-icon {
+      grid-area: icon;
+      align-self: start;
+    }
+    .r-measure {
+      grid-area: measure;
+    }
+    .r-cell {
+      grid-area: mine;
+    }
+    .r-cell.base {
+      grid-area: base;
+    }
+    .r-go {
+      grid-area: go;
+    }
+    .row:hover,
+    .row:focus-within,
+    .rows:not(:hover):not(:focus-within) .row.first {
+      transform: none;
+    }
+  }
+</style>

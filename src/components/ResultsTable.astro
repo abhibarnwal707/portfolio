@@ -27,7 +27,7 @@ const { rows } = Astro.props;
   .table-wrap {
     overflow-x: auto;
     border-radius: var(--radius);
-    background: var(--surface);
+    background: var(--bg-deep);
   }
   table {
     width: 100%;
@@ -35,31 +35,39 @@ const { rows } = Astro.props;
   }
   th,
   td {
-    padding: 16px 20px;
+    padding: 18px 22px;
     text-align: left;
     vertical-align: top;
-    border-bottom: 1px solid var(--surface-2); /* taste-skill-ignore: a real table */
+    border-bottom: 2px solid var(--line);
   }
   tbody tr:last-child > * {
     border-bottom: 0;
   }
   thead th {
-    font-size: var(--step-small);
-    font-weight: 600;
-    color: var(--muted);
-    background: var(--surface-2);
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--yellow);
   }
   tbody th {
-    font-weight: 500;
+    font-weight: 700;
     width: 42%;
   }
   td {
-    font-variant-numeric: tabular-nums lining-nums;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+  }
+  tbody tr {
+    transition: background-color 220ms ease;
+  }
+  tbody tr:hover {
+    background: var(--bg);
   }
   @media (max-width: 560px) {
     th,
     td {
-      padding: 12px 14px;
+      padding: 14px;
     }
   }
 </style>

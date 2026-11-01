@@ -141,3 +141,36 @@ if (menu) {
     }
   });
 }
+
+/* ---- tabs: one active panel, a sliding cream pill, arrow keys between tabs ---- */
+document.querySelectorAll<HTMLElement>('[data-tabs]').forEach((box) => {
+  const tabs = [...box.querySelectorAll<HTMLButtonElement>('[role="tab"]')];
+  const panels = tabs.map((t) => document.getElementById(t.getAttribute('aria-controls')!)!);
+  const pill = box.querySelector<HTMLElement>('.tabs-pill');
+
+  const movePill = (t: HTMLButtonElement) => {
+    if (!pill) return;
+    pill.style.width = `${t.offsetWidth}px`;
+    pill.style.transform = `translateX(${t.offsetLeft}px)`;
+  };
+  const select = (i: number, focus = false) => {
+    tabs.forEach((t, n) => {
+      t.setAttribute('aria-selected', String(n === i));
+      t.tabIndex = n === i ? 0 : -1;
+      panels[n].hidden = n !== i;
+    });
+    movePill(tabs[i]);
+    if (focus) tabs[i].focus();
+  };
+
+  tabs.forEach((t, i) => {
+    t.addEventListener('click', () => select(i));
+    t.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') select((i + 1) % tabs.length, true);
+      if (e.key === 'ArrowLeft') select((i - 1 + tabs.length) % tabs.length, true);
+    });
+  });
+  select(0);
+  addEventListener('resize', () => movePill(tabs[tabs.findIndex((t) => t.getAttribute('aria-selected') === 'true')]));
+  document.fonts?.ready.then(() => movePill(tabs[tabs.findIndex((t) => t.getAttribute('aria-selected') === 'true')]));
+});

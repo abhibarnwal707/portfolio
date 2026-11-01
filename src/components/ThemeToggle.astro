@@ -2,36 +2,21 @@
 import Icon from './Icon.astro';
 ---
 
-<button type="button" class="theme-toggle" data-theme-toggle aria-label="Switch to dark theme">
+<button type="button" class="round theme-toggle" data-theme-toggle aria-label="Switch to dark theme">
   <span class="icon icon-moon"><Icon name="moon" /></span>
   <span class="icon icon-sun"><Icon name="sun" /></span>
 </button>
 
 <style>
   .theme-toggle {
-    display: grid;
-    place-items: center;
-    width: 44px;
-    height: 44px;
-    border: 0;
-    border-radius: 999px;
-    background: var(--surface-2);
-    color: var(--ink);
-    cursor: pointer;
-    transition: transform var(--t-hover) var(--ease-out);
-  }
-  .theme-toggle:hover {
-    transform: rotate(-12deg);
-  }
-  .theme-toggle:active {
-    transform: scale(0.92);
+    position: relative;
   }
   .icon {
     grid-area: 1 / 1;
     display: grid;
-    transition: transform 400ms var(--ease-out), opacity 300ms ease;
+    transition: transform 420ms var(--ease-out), opacity 300ms ease;
   }
-  /* light theme shows the moon (click to go dark), dark theme shows the sun */
+  /* red colourway shows the moon (go blue), blue colourway shows the sun (go red) */
   .icon-sun {
     opacity: 0;
     transform: rotate(-90deg) scale(0.5);
@@ -52,7 +37,7 @@ import Icon from './Icon.astro';
 <script>
   const btn = document.querySelector<HTMLButtonElement>('[data-theme-toggle]');
   const root = document.documentElement;
-  const COLORS = { light: '#E8E8E3', dark: '#161513' } as const;
+  const COLORS = { light: '#CF3A24', dark: '#1F3A93' } as const;
   type Theme = keyof typeof COLORS;
 
   const stored = (): Theme | null => {

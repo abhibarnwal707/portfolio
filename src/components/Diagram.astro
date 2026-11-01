@@ -89,7 +89,7 @@ const summary = `${project.name} architecture: ${main.join(' → ')}.${side.leng
         <svg class={`d-${v.key}`} viewBox={`0 0 ${v.width} ${v.height}`} role="img" aria-label={summary}>
           <defs>
             <marker id={marker} viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
-              <path d="M0 0L10 5L0 10z" fill="var(--accent)" />
+              <path d="M0 0L10 5L0 10z" fill="var(--yellow)" />
             </marker>
           </defs>
           {v.s && (
@@ -100,7 +100,7 @@ const summary = `${project.name} architecture: ${main.join(' → ')}.${side.leng
           {groups.map(({ g, side: isSide }) => (
             <>
               {g.edges.map((d) => (
-                <path d={d} fill="none" stroke="var(--accent)" stroke-width="2" marker-end={`url(#${marker})`} />
+                <path d={d} fill="none" stroke="var(--yellow)" stroke-width="2" marker-end={`url(#${marker})`} />
               ))}
               {g.boxes.map((b, i) => {
                 const end = !isSide && (i === 0 || i === g.boxes.length - 1);
@@ -135,9 +135,6 @@ const summary = `${project.name} architecture: ${main.join(' → ')}.${side.leng
 <style>
   .diagram {
     margin: 0;
-    padding: clamp(20px, 3vw, 32px);
-    background: var(--surface);
-    border-radius: var(--radius);
   }
   svg {
     width: 100%;
@@ -158,27 +155,38 @@ const summary = `${project.name} architecture: ${main.join(' → ')}.${side.leng
       display: none;
     }
   }
-  /* boxes are filled tones, not outlines; the path's ends are set in full ink */
+  /* boxes in the field colour, the path's two ends in cream, connectors in yellow */
   .box {
-    fill: var(--surface-2);
+    fill: var(--bg);
+    stroke: var(--line);
+    stroke-width: 2;
   }
   .box.end {
-    fill: var(--ink);
+    fill: var(--cream);
+    stroke: var(--cream);
   }
   .box.end + text {
-    fill: var(--bg);
+    fill: var(--cream-ink);
   }
   .box.side {
-    fill: var(--bg);
+    fill: transparent;
+    stroke: var(--cream);
+    stroke-dasharray: 6 5;
   }
   text {
     font-family: var(--font);
     font-size: 14px;
+    font-weight: 600;
     fill: var(--ink);
   }
   .side-label {
-    font-size: 14px;
-    font-weight: 600;
-    fill: var(--muted);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.25em;
+    text-transform: uppercase;
+    fill: var(--yellow);
+  }
+  :global(.diagram path[marker-end]) {
+    stroke: var(--yellow);
   }
 </style>

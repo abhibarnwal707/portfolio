@@ -1,0 +1,276 @@
+---
+/*
+  The hero illustration: the monogram "AK" standing on a plinth, with one prop per project
+  (RedString's monitor showing its real 79.8% vs 13.8% result, PaperTrail's paper stack,
+  CartRank's cart) joined by a red string. Built from isometric geometry at build time.
+*/
+
+const S = 30; // px per grid unit
+const C = Math.cos(Math.PI / 6);
+type P3 = [number, number, number];
+type Face = { d: string; fill: string; cls?: string; key?: number };
+
+const proj = ([x, y, z]: P3): [number, number] => [(x - y) * C * S, (x + y) * 0.5 * S - z * S];
+const all: [number, number][] = [];
+const path = (pts: P3[]) => {
+  const p = pts.map(proj);
+  all.push(...p);
+  return 'M' + p.map(([a, b]) => `${a.toFixed(1)} ${b.toFixed(1)}`).join('L') + 'Z';
+};
+
+interface Shade {
+  top: string;
+  front: string;
+  right: string;
+}
+const cream: Shade = { top: '#FFFBF4', front: '#F2DCD3', right: '#E2C2B8' };
+const plinthLow: Shade = { top: '#F2DCD3', front: '#E2C2B8', right: '#CFA79C' };
+const desk: Shade = { top: '#7FA2FF', front: '#4C74E0', right: '#3A5FC8' };
+const dark: Shade = { top: '#4A4068', front: '#2B2347', right: '#221C3A' };
+const paper: Shade = { top: '#FFFFFF', front: '#E9EEF6', right: '#D2DAE8' };
+const yellow: Shade = { top: '#FFE07A', front: '#FFC21A', right: '#E09F00' };
+
+// A box: only the three faces the viewer can see (top, front = +y, right = +x).
+const box = (x: number, y: number, z: number, dx: number, dy: number, dz: number, s: Shade, cls = ''): Face[] => {
+  const X = x + dx, Y = y + dy, Z = z + dz;
+  return [
+    { d: path([[x, Y, z], [X, Y, z], [X, Y, Z], [x, Y, Z]]), fill: s.front, cls },
+    { d: path([[X, y, z], [X, Y, z], [X, Y, Z], [X, y, Z]]), fill: s.right, cls },
+    { d: path([[x, y, Z], [X, y, Z], [X, Y, Z], [x, Y, Z]]), fill: s.top, cls },
+  ];
+};
+
+// A letter: an outline (and holes) in the x–z plane, extruded along y from yb (back) to yf (front).
+type P2 = [number, number];
+const letter = (outline: P2[], holes: P2[][], ox: number, oz: number, yb: number, yf: number, s: Shade): Face[] => {
+  const sides: Face[] = [];
+  for (const ring of [outline, ...holes]) {
+    ring.forEach((p, i) => {
+      const q = ring[(i + 1) % ring.length];
+      const nu = q[1] - p[1];
+      const nv = -(q[0] - p[0]);
+      if (nu + nv <= 0) return; // faces away from the viewer
+      const a: P3 = [ox + p[0], yb, oz + p[1]];
+      const b: P3 = [ox + q[0], yb, oz + q[1]];
+      const fill = nv > Math.abs(nu) ? s.top : s.right;
+      const key = ox + (p[0] + q[0]) / 2 + (oz + (p[1] + q[1]) / 2);
+      sides.push({ d: path([a, b, [b[0], yf, b[2]], [a[0], yf, a[2]]]), fill, key });
+    });
+  }
+  sides.sort((m, n) => (m.key ?? 0) - (n.key ?? 0));
+  const front = [outline, ...holes].map((ring) => path(ring.map(([u, v]) => [ox + u, yf, oz + v] as P3))).join('');
+  return [...sides, { d: front, fill: s.top, cls: 'evenodd' }];
+};
+
+const A: P2[] = [[0, 0], [1.7, 0], [2.2, 1.5], [3.8, 1.5], [4.3, 0], [6, 0], [4, 6], [2, 6]];
+const Ahole: P2[] = [[2.53, 2.5], [3, 3.9], [3.47, 2.5]];
+const K: P2[] = [[0, 0], [1.7, 0], [1.7, 2.2], [3.4, 0], [5.4, 0], [2.9, 3.2], [5.2, 6], [3.2, 6], [1.7, 4], [1.7, 6], [0, 6]];
+
+const top = 1.2; // plinth height
+const faces: Face[] = [];
+
+// long ground shadow, then the two-tier plinth
+const sh = 2.6, sv = 0.6;
+const shadow = path([[0, 0, 0], [14.5, 0, 0], [14.5 + sh, sv, 0], [14.5 + sh, 9.5 + sv, 0], [sh, 9.5 + sv, 0], [0, 9.5, 0]]);
+faces.push(...box(0, 0, 0, 14.5, 9.5, 0.6, plinthLow));
+faces.push(...box(0.3, 0.3, 0.6, 13.9, 8.9, 0.6, cream));
+
+// the monogram
+faces.push(...letter(A, [Ahole], 1, top, 1.4, 2.9, cream));
+faces.push(...letter(K, [], 7.7, top, 1.4, 2.9, cream));
+
+// RedString: a desk and a monitor showing the real result
+faces.push(...box(0.9, 4.6, top, 3.8, 2.8, 1.3, desk));
+faces.push(...box(2.55, 5.3, top + 1.3, 0.5, 0.5, 0.6, dark));
+faces.push(...box(1.2, 5.15, top + 1.9, 3.3, 0.4, 2.5, dark));
+const scrY = 5.55;
+const screen = path([[1.45, scrY, top + 2.15], [4.25, scrY, top + 2.15], [4.25, scrY, top + 4.15], [1.45, scrY, top + 4.15]]);
+const barBase = top + 2.35;
+const barMax = 1.55;
+const mine = path([[1.9, scrY, barBase], [2.6, scrY, barBase], [2.6, scrY, barBase + barMax], [1.9, scrY, barBase + barMax]]);
+const base = path([[3.05, scrY, barBase], [3.75, scrY, barBase], [3.75, scrY, barBase + barMax * (13.8 / 79.8)], [3.05, scrY, barBase + barMax * (13.8 / 79.8)]]);
+
+// PaperTrail: a stack of sheets with lines of text on the top one
+const sheets: Face[] = [];
+for (let i = 0; i < 6; i++) {
+  const off = i % 2 ? 0.14 : 0;
+  sheets.push(...box(6.2 + off, 5.0 - off, top + i * 0.2, 2.5, 2.2, 0.2, paper));
+}
+const pz = top + 6 * 0.2;
+const lines = [0.5, 0.95, 1.4, 1.85].map((t, i) => path([[6.55, 5.0 + t, pz], [6.55 + (i === 3 ? 1.1 : 1.8), 5.0 + t, pz], [6.55 + (i === 3 ? 1.1 : 1.8), 5.1 + t, pz], [6.55, 5.1 + t, pz]]));
+const flag = box(8.35, 5.25, pz, 0.25, 0.6, 0.6, { top: '#FF6A4D', front: '#E8412C', right: '#C7321F' });
+
+// CartRank: a basket on wheels with a handle
+const wheels = [
+  [10.7, 7.0],
+  [12.7, 7.0],
+  [12.7, 5.4],
+].map(([x, y]) => proj([x, y, top + 0.25]));
+const legs = [
+  [[10.7, 7.0, top + 0.3], [10.6, 7.0, top + 0.8]],
+  [[12.7, 7.0, top + 0.3], [12.8, 7.0, top + 0.8]],
+].map((seg) => 'M' + seg.map((p) => proj(p as P3).map((n) => n.toFixed(1)).join(' ')).join('L'));
+const basket = box(10.3, 5.2, top + 0.8, 2.8, 2.0, 1.5, yellow);
+const rimInner = path([[10.55, 5.45, top + 2.3], [12.85, 5.45, top + 2.3], [12.85, 6.95, top + 2.3], [10.55, 6.95, top + 2.3]]);
+const grid = [0.7, 1.4, 2.1].map((t) => {
+  const a = proj([10.3 + t, 7.2, top + 0.9]);
+  const b = proj([10.3 + t, 7.2, top + 2.2]);
+  return `M${a[0].toFixed(1)} ${a[1].toFixed(1)}L${b[0].toFixed(1)} ${b[1].toFixed(1)}`;
+});
+const handle = 'M' + ([[10.3, 6.2, top + 2.3], [9.7, 6.2, top + 3.1], [9.3, 6.2, top + 3.1]] as P3[]).map((p) => proj(p).map((n) => n.toFixed(1)).join(' ')).join('L');
+
+// the red string: pins on each piece, joined by a smooth curve
+const pins = ([
+  [4.0, 2.9, top + 5.3], // on the A
+  [8.55, 2.9, top + 5.0], // on the K
+  [12.1, 6.2, top + 2.3], // on the cart
+  [7.6, 6.1, pz], // on the papers
+  [3.9, scrY, top + 4.15], // on the monitor
+] as P3[]).map(proj);
+all.push(...pins);
+const string = (() => {
+  // Catmull–Rom through the pins, as cubic Béziers
+  const p = pins;
+  let d = `M${p[0][0].toFixed(1)} ${p[0][1].toFixed(1)}`;
+  for (let i = 0; i < p.length - 1; i++) {
+    const p0 = p[i - 1] ?? p[i];
+    const p1 = p[i];
+    const p2 = p[i + 1];
+    const p3 = p[i + 2] ?? p2;
+    const c1 = [p1[0] + (p2[0] - p0[0]) / 6, p1[1] + (p2[1] - p0[1]) / 6 + 14];
+    const c2 = [p2[0] - (p3[0] - p1[0]) / 6, p2[1] - (p3[1] - p1[1]) / 6 + 14];
+    d += `C${c1[0].toFixed(1)} ${c1[1].toFixed(1)} ${c2[0].toFixed(1)} ${c2[1].toFixed(1)} ${p2[0].toFixed(1)} ${p2[1].toFixed(1)}`;
+  }
+  return d;
+})();
+
+const xs = all.map((p) => p[0]);
+const ys = all.map((p) => p[1]);
+const pad = 24;
+const vb = [Math.min(...xs) - pad, Math.min(...ys) - pad, Math.max(...xs) - Math.min(...xs) + pad * 2, Math.max(...ys) - Math.min(...ys) + pad * 2];
+---
+
+<svg
+  class="iso"
+  viewBox={vb.map((n) => n.toFixed(0)).join(' ')}
+  role="img"
+  aria-label="Illustration: the letters AK on a plinth, with a monitor showing 79.8% against 13.8%, a stack of papers and a shopping cart, joined by a red string"
+>
+  <path d={shadow} class="shadow" />
+  <g class="float">
+    {faces.map((f) => <path d={f.d} fill={f.fill} class:list={['face', f.cls]} />)}
+    <path d={screen} fill="#1D2B5C" class="face" />
+    <path d={mine} fill="#FF4B3E" class="bar" />
+    <path d={base} fill="#9AA6C9" class="bar bar-2" />
+    <g class="papers">
+      {sheets.map((f) => <path d={f.d} fill={f.fill} class="face" />)}
+      {lines.map((d) => <path d={d} fill="#9AA6C9" />)}
+      {flag.map((f) => <path d={f.d} fill={f.fill} class="face" />)}
+    </g>
+    {legs.map((d) => <path d={d} class="wire" />)}
+    {wheels.map(([cx, cy]) => <ellipse cx={cx} cy={cy} rx="9" ry="6" fill="#2B2347" class="face" />)}
+    {basket.map((f) => <path d={f.d} fill={f.fill} class="face" />)}
+    <path d={rimInner} fill="#E09F00" class="face" />
+    {grid.map((d) => <path d={d} class="wire thin" />)}
+    <path d={handle} class="wire" />
+    <path d={string} class="string" pathLength="1" />
+    {
+      pins.map(([cx, cy], i) => (
+        <g class="pin" style={`--i:${i}`}>
+          <circle cx={cx} cy={cy} r="7" fill="#FFD23F" class="face" />
+        </g>
+      ))
+    }
+  </g>
+</svg>
+
+<style>
+  .iso {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+  .shadow {
+    fill: var(--iso-shadow);
+    transition: fill 400ms ease;
+  }
+  .face {
+    stroke: #1e1530;
+    stroke-width: 1.6;
+    stroke-linejoin: round;
+  }
+  .evenodd {
+    fill-rule: evenodd;
+  }
+  .wire {
+    fill: none;
+    stroke: #1e1530;
+    stroke-width: 5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+  .wire.thin {
+    stroke-width: 2;
+  }
+  .string {
+    fill: none;
+    stroke: #ff3b2f;
+    stroke-width: 3.5;
+    stroke-linecap: round;
+    filter: drop-shadow(0 2px 0 rgb(30 21 48 / 0.6));
+  }
+  .bar {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .float {
+      animation: float 7s ease-in-out infinite;
+    }
+    .papers {
+      animation: lift 5s ease-in-out infinite;
+    }
+    .string {
+      stroke-dasharray: 1;
+      stroke-dashoffset: 1;
+      animation: draw 1800ms var(--ease-expo) 700ms forwards;
+    }
+    .pin {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: pop 600ms var(--ease-out) both;
+      animation-delay: calc(500ms + var(--i) * 140ms);
+    }
+    .bar {
+      animation: grow 1200ms var(--ease-expo) 900ms both;
+    }
+    .bar-2 {
+      animation-delay: 1100ms;
+    }
+  }
+  @keyframes float {
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+  @keyframes lift {
+    50% {
+      transform: translateY(-4px);
+    }
+  }
+  @keyframes draw {
+    to {
+      stroke-dashoffset: 0;
+    }
+  }
+  @keyframes pop {
+    from {
+      transform: scale(0);
+    }
+  }
+  @keyframes grow {
+    from {
+      transform: scaleY(0);
+    }
+  }
+</style>
